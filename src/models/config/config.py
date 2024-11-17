@@ -1,18 +1,19 @@
 import os
 import os.path
 import platform
-import random
 import re
 import time
 from configparser import RawConfigParser
 
-from models.base.utils import singleton
+from models.base.utils import get_user_agent, singleton
 from models.config.config_generated import GeneratedConfig
 from models.config.config_manual import ManualConfig
 
 
 @singleton
 class MDCxConfig(GeneratedConfig, ManualConfig):
+    mark_file_name = 'MDCx.config'
+
     def __init__(self):
         self.file = None
         self.folder = None
@@ -34,6 +35,34 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
     def path(self):
         return self._path
 
+    def get_mac_default_config_folder(self):
+        """
+        获取macOS下默认的配置文件夹路径
+
+        ~/.mdcx
+
+        :return: 配置文件夹路径
+        """
+
+        home = os.path.expanduser('~')
+        folder_name = '.mdcx'
+        config_folder = os.path.join(home, folder_name)
+        if not os.path.exists(config_folder):
+            os.makedirs(config_folder, exist_ok=True, mode=0o755)
+        return config_folder
+
+    def get_mark_file_path(self):
+        """
+        获取`记录了配置文件路径`的文件的路径。
+        对于macOS，该文件位于`~/.mdcx/MDCx.config`。
+        其他平台，该文件跟应用程序在同一目录下。
+        """
+
+        if platform.system() == 'Darwin':
+            return os.path.join(self.get_mac_default_config_folder(), self.mark_file_name)
+        else:
+            return self.mark_file_name
+
     def read_config(self):
         self._get_config_path()
         reader = RawConfigParser()
@@ -48,10 +77,10 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
                     setattr(self, key, float(value))
                 else:
                     setattr(self, key, value)
-        self._update_config()
+        self.update_config()
 
     def save_config(self):
-        with open('MDCx.config', 'w', encoding='UTF-8') as f:
+        with open(self.get_mark_file_path(), 'w', encoding='UTF-8') as f:
             f.write(self.path)
         with open(self.path, "wt", encoding='UTF-8') as code:
             # 使用反射保存自定义网址设置
@@ -72,6 +101,7 @@ extrafanart_folder = {self.extrafanart_folder}
 media_type = {self.media_type}
 sub_type = {self.sub_type}
 scrape_softlink_path = {self.scrape_softlink_path}
+auto_link = {self.auto_link}
 
 [escape]
 folders = {self.folders}
@@ -229,11 +259,13 @@ subtitle_add_rescrape = {self.subtitle_add_rescrape}
 server_type = {self.server_type}
 emby_url = {self.emby_url}
 api_key = {self.api_key}
+user_id = {self.user_id}
 emby_on = {self.emby_on}
 use_database = {self.use_database}
 info_database_path = {self.info_database_path}
 gfriends_github = {self.gfriends_github}
 actor_photo_folder = {self.actor_photo_folder}
+actor_photo_kodi_auto = {self.actor_photo_kodi_auto}
 
 [mark]
 poster_mark = {self.poster_mark}
@@ -287,18 +319,12 @@ statement = {self.statement}
         with open(self.path, "wt", encoding='UTF-8') as code:
             print(GeneratedConfig.CONFIG_STR, file=code)
 
-    def _update_config(self):
+    def update_config(self):
         # 获取proxies
         if self.type == 'http':
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
+            self.proxies = {"http": "http://" + self.proxy, "https": "http://" + self.proxy, }
         elif self.type == 'socks5':
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+            self.proxies = {"http": "socks5h://" + self.proxy, "https": "socks5h://" + self.proxy, }
         else:
             self.proxies = None
 
@@ -306,18 +332,7 @@ statement = {self.statement}
         self.theporndb_no_hash = 'theporndb_no_hash' in self.switch_on
 
         # 获取User-Agent
-        temp_l = random.randint(110, 117)
-        temp_m = random.randint(1, 5563)
-        temp_n = random.randint(1, 180)
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s.0.%s.%s Safari/537.36' % (
-                temp_l, temp_m, temp_n),
-        }
-
-        # 获取javdb_cookie
-        self.javdb_cookie = {'cookie': self.javdb} if self.javdb else None
-
-        self.javbus_cookie = {'cookie': self.javbus} if self.javbus else None
+        self.headers = {'User-Agent': get_user_agent(), }
 
         # 去掉^符号！！！
         self.cnword_style = self.cnword_style.strip('^')
@@ -335,17 +350,13 @@ statement = {self.statement}
         # 是否清理文件以及清理列表
         can_clean = True if 'i_know' in self.clean_enable and 'i_agree' in self.clean_enable else False
         can_clean_auto = True if can_clean and 'clean_auto' in self.clean_enable else False
-        clean_ext_list = re.split(r'[|｜，,]', self.clean_ext) \
-            if can_clean and self.clean_ext and 'clean_ext' in self.clean_enable else []
-        clean_name_list = re.split(r'[|｜，,]', self.clean_name) \
-            if can_clean and self.clean_name and 'clean_name' in self.clean_enable else []
-        clean_contains_list = re.split(r'[|｜，,]', self.clean_contains) \
-            if can_clean and self.clean_contains and 'clean_contains' in self.clean_enable else []
+        clean_ext_list = re.split(r'[|｜，,]', self.clean_ext) if can_clean and self.clean_ext and 'clean_ext' in self.clean_enable else []
+        clean_name_list = re.split(r'[|｜，,]', self.clean_name) if can_clean and self.clean_name and 'clean_name' in self.clean_enable else []
+        clean_contains_list = re.split(r'[|｜，,]', self.clean_contains) if can_clean and self.clean_contains and 'clean_contains' in self.clean_enable else []
         clean_size_list = self.clean_size if can_clean and 'clean_size' in self.clean_enable else ''
-        clean_ignore_ext_list = re.split(r'[|｜，,]', self.clean_ignore_ext) \
-            if can_clean and self.clean_ignore_ext and 'clean_ignore_ext' in self.clean_enable else []
-        clean_ignore_contains_list = re.split(r'[|｜，,]', self.clean_ignore_contains) \
-            if can_clean and self.clean_ignore_contains and 'clean_ignore_contains' in self.clean_enable else []
+        clean_ignore_ext_list = re.split(r'[|｜，,]', self.clean_ignore_ext) if can_clean and self.clean_ignore_ext and 'clean_ignore_ext' in self.clean_enable else []
+        clean_ignore_contains_list = re.split(r'[|｜，,]',
+                                              self.clean_ignore_contains) if can_clean and self.clean_ignore_contains and 'clean_ignore_contains' in self.clean_enable else []
         self.can_clean = can_clean
         self.can_clean_auto = can_clean_auto
         self.clean_ext_list = clean_ext_list
@@ -362,14 +373,14 @@ statement = {self.statement}
 
         # 番号对应官网
         official_websites_dic = {}
-        for key, value in self.official_websites.items():
+        for key, value in self.official.items():
             temp_list = value.upper().split('|')
             for each in temp_list:
                 official_websites_dic[each] = key
         self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
-        all_str_list = ['mosaic', 'cnword']
+        all_str_list = ['mosaic', 'cnword', 'definition']
         read_str_list = re.split(r'[,，]', self.suffix_sort)
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
@@ -379,10 +390,13 @@ statement = {self.statement}
         self.suffix_sort = new_str
 
     def _get_config_path(self):
-        mdcx_config = 'MDCx.config'  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
+        mdcx_config = self.get_mark_file_path()  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
         # 此文件必须存在, 且与 main.py 或打包的可执行文件在同一目录下.
         if not os.path.exists(mdcx_config):  # 不存在时, 创建
-            self.path = os.path.realpath('config.ini')  # 默认配置文件: 同目录下的 config.ini
+            if platform.system() == 'Darwin':
+                self.path = os.path.join(self.get_mac_default_config_folder(), 'config.ini')  # macOS下默认配置文件: ~/.mdcx/config.ini
+            else:
+                self.path = os.path.realpath('config.ini')  # 默认配置文件: 同目录下的 config.ini
             # 设置默认配置文件路径, 若存在则可读取, 否则生成默认配置文件
             with open(mdcx_config, 'w', encoding='UTF-8') as f:
                 f.write(self.path)

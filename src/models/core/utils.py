@@ -60,7 +60,7 @@ def show_movie_info(json_data):
 
 
 def get_video_size(json_data, file_path):
-    # 获取本地分辨率
+    # 获取本地分辨率 同时获取视频编码格式
     definition = ''
     height = 0
     hd_get = config.hd_get
@@ -73,6 +73,10 @@ def get_video_size(json_data, file_path):
         try:
             cap = cv2.VideoCapture(file_path)
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            ##使用opencv获取编码器格式
+            codec = int(cap.get(cv2.CAP_PROP_FOURCC))
+            codec_fourcc = chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
+
         except Exception as e:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_traceback_log(str(e))
@@ -131,6 +135,8 @@ def get_video_size(json_data, file_path):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and 'definition' in config.tag_include:
         new_tag_list.insert(0, definition)
+        if hd_get == 'video':
+            new_tag_list.insert(0, codec_fourcc.upper())  # 插入编码格式
     json_data['tag'] = '，'.join(new_tag_list)
     return json_data
 
@@ -158,47 +164,24 @@ def show_data_result(json_data, start_time):
 def deal_url(url):
     if '://' not in url:
         url = 'https://' + url
-    url = url.strip('/ ')
+    url = url.strip()
     for key, vlaue in config.web_dic.items():
         if key.lower() in url.lower():
             return vlaue, url
 
     # 自定义的网址
-    avsex_website = config.avsex_website
-    if avsex_website and avsex_website in url:
-        return 'avsex', url
-    iqqtv_website = config.iqqtv_website
-    if iqqtv_website and iqqtv_website in url:
-        return 'iqqtv', url
-    hdouban_website = config.hdouban_website
-    if hdouban_website and hdouban_website in url:
-        return 'hdouban', url
-    mdtv_website = config.mdtv_website
-    if mdtv_website and mdtv_website in url:
-        return 'mdtv', url
-    airavcc_website = config.airavcc_website
-    if airavcc_website and airavcc_website in url:
-        return 'airav_cc', url
-    lulubar_website = config.lulubar_website
-    if lulubar_website and lulubar_website in url:
-        return 'lulubar', url
-    javbus_website = config.javbus_website
-    if javbus_website and javbus_website in url:
-        return 'javbus', url
-    javdb_website = config.javdb_website
-    if javdb_website and javdb_website in url:
-        return 'javdb', url
-    javlibrary_website = config.javlibrary_website
-    if javlibrary_website and javlibrary_website in url:
-        return 'javlibrary', url
+    for web_name in config.SUPPORTED_WEBSITES:
+        if hasattr(config, web_name + '_website'):
+            web_url = getattr(config, web_name + '_website')
+            if web_url in url:
+                return web_name, url
 
     return False, url
 
 
 def replace_special_word(json_data):
     # 常见字段替换的字符
-    all_key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'series', 'director', 'studio',
-                    'publisher', 'tag']
+    all_key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'series', 'director', 'studio', 'publisher', 'tag']
     for key, value in config.special_word.items():
         for each in all_key_word:
             json_data[each] = json_data[each].replace(key, value)
@@ -308,17 +291,13 @@ def get_movie_path_setting(file_path=''):
     movie_path = nfd2c(movie_path)
     end_folder_name = split_path(movie_path)[1]
     # 用户设置的软链接输出目录
-    softlink_path = config.softlink_path \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    softlink_path = config.softlink_path.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的成功输出目录
-    success_folder = config.success_output_folder \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    success_folder = config.success_output_folder.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的失败输出目录
-    failed_folder = config.failed_output_folder \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    failed_folder = config.failed_output_folder.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的排除目录
-    escape_folder_list = config.folders \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name).replace('，', ',').split(',')
+    escape_folder_list = config.folders.replace('\\', '/').replace('end_folder_name', end_folder_name).replace('，', ',').split(',')
     # 用户设置的剧照副本目录
     extrafanart_folder = config.extrafanart_folder.replace('\\', '/')
 
@@ -352,5 +331,4 @@ def get_movie_path_setting(file_path=''):
             success_folder = success_folder.replace('first_folder_name', first_folder_name)
             failed_folder = failed_folder.replace('first_folder_name', first_folder_name)
 
-    return convert_path(movie_path), success_folder, failed_folder, \
-        escape_folder_new_list, extrafanart_folder, softlink_path
+    return convert_path(movie_path), success_folder, failed_folder, escape_folder_new_list, extrafanart_folder, softlink_path

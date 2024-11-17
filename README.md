@@ -2,34 +2,91 @@
 
 ![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python&logoColor=white)
 
-## 项目缘由
+## 上游项目
 
-* 一切的起源是 [yoshiko2/Movie_Data_Capture](https://github.com/yoshiko2/Movie_Data_Capture), 这是一个 CLI 工具,
+* [yoshiko2/Movie_Data_Capture](https://github.com/yoshiko2/Movie_Data_Capture): CLI 工具,
   开源版本现已不活跃, 新版本已闭源商业化.
+* [moyy996/AVDC](https://github.com/moyy996/AVDC): 上述项目早期的一个 Fork, 使用 PyQt 实现了图形界面, 已停止维护
+* @Hermit/MDCx: AVDC 的 Fork, 一度在 [anyabc/something](https://github.com/anyabc/something/releases) 分发源代码及可执行文件.
+* 2023-11-3 @anyabc 因未知原因销号删库, 其分发的最后一个版本号为 20231014.
 
-* [moyy996/AVDC](https://github.com/moyy996/AVDC) 是上述项目早期的一个 Fork, 使用 PyQt 实现了图形界面, 但早已无人维护.
-
-* 在 AVDC 基础上, @Hermit 开发并维护了 MDCx 项目,
-  并通过 [anyabc/something](https://github.com/anyabc/something/releases) 仓库的 release 分发源代码及可执行文件.
-
-* 2023.11.3 月, @anyabc 因未知原因销号删库, 其分发的最后一个版本号为 20231014.
-
-向以上相关开发者表示敬意.
+向相关开发者表示敬意.
 
 ## 关于本项目
 
-* 本项目基于 MDCx, 从功能而言并无变化, 不过对代码进行了大幅的重构与拆分, 以提高可维护性
-* 由于我没有 MacOS 设备, 因此无法提供相应平台的二进制构建及打包脚本
+* 本项目基于 @Hermit/MDCx, 对代码进行了大幅的重构与拆分, 以提高可维护性
+* MacOS 版本为自动构建, 不保证可用性
 * 尽管重构了大部分代码, 但由于代码耦合度仍然很高, 可维护性很差, 因此仅修复 bug, 不考虑加入新功能
 * 当然如果直接 PR 也可以
 
-## 开发相关
+## 构建
 
-项目环境为 Python 3.9. 以下内容可能有助于理解及修改代码.
+> 一般情况请勿自行构建, 至 [Release](https://github.com/sqzw-x/mdcx/releases) 下载最新版
 
-### 打包
+#### Windows 7
 
-安装 `pyinstaller` 后运行 `build.ps1`, 打包文件在 `dist` 目录下
+Windows 7 上需使用 Python 3.8 构建, 代码及依赖均兼容, 可在本地自行构建. 也可使用 GitHub Actions 构建:
+
+1. fork 本仓库, 在仓库设置中启用 Actions
+2. 参考 [为存储库创建配置变量](https://docs.github.com/zh/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository), 设置 `BUILD_FOR_WINDOWS_LEGACY` 变量, 值非空即可
+3. 在 Actions 中手动运行 `Build and Release`
+
+#### macOS
+
+低版本 macOS: 需注意 opencv 兼容性问题, 参考 [issue #82](https://github.com/sqzw-x/mdcx/issues/82#issuecomment-1947973961).
+也可使用 GitHub Actions 构建, 步骤同上, 需设置 `BUILD_FOR_MACOS_LEGACY` 变量, 值非空即可;
+以及 `MACOS_LEGACY_CV_VERSION` 变量, 值为兼容的 `opencv-contrib-python-headless` 版本
+
+ARM64(AArch64) 架构: 可本地构建. 若欲使用 GitHub Actions 构建, 需 [添加自托管的运行器](https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners),
+并设置 `SELF_HOSTED_MACOS_ARM64_RUNNER` 变量
+
+## 开发
+
+### 环境准备
+- python 3.9
+- Windows 10/11
+- macOS 10.15.7+
+
+### 准备源码
+- 方式1: 下载 [仓库源码](https://github.com/sqzw-x/mdcx/archive/refs/heads/master.zip) 或 [Release源码](https://github.com/sqzw-x/mdcx/archive/refs/tags/daily_release.zip)，下载后解压
+- 方式2: git克隆项目
+  ```bash
+  git clone https://github.com/sqzw-x/mdcx.git
+  ```
+
+### 运行
+#### Windows
+
+- cmd
+```batch
+cd /d D:\dev\mdcx
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+set PYTHONPATH=.\src;%PYTHONPATH%
+python main.py
+```
+
+- powershell
+```powershell
+cd D:\dev\mdcx
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:PYTHONPATH = "./src;$env:PYTHONPATH"
+python main.py
+```
+
+#### macOS
+
+```bash
+cd /path/to/mdcx
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements-mac.txt
+export PYTHONPATH=./src:$PYTHONPATH
+python main.py
+```
 
 ### 如何添加新配置项
 

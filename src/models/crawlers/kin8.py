@@ -44,8 +44,7 @@ def get_actor(html):
 
 
 def get_tag(html):
-    result = html.xpath(
-        '//td[@class="movie_table_td" and contains(text(), "カテゴリー")]/following-sibling::td/div/a/text()')
+    result = html.xpath('//td[@class="movie_table_td" and contains(text(), "カテゴリー")]/following-sibling::td/div/a/text()')
     return ','.join(result)
 
 
@@ -77,8 +76,7 @@ def get_extrafanart(html):
         if i:
             if 'http' not in i:
                 i = f"https:{i}"
-            new_result.append(
-                i.replace('/2.jpg', '/2_lg.jpg').replace('/3.jpg', '/3_lg.jpg').replace('/4.jpg', '/4_lg.jpg'))
+            new_result.append(i.replace('/2.jpg', '/2_lg.jpg').replace('/3.jpg', '/3_lg.jpg').replace('/4.jpg', '/4_lg.jpg'))
     return new_result
 
 
@@ -96,10 +94,13 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         debug_info = ''
         if real_url:
             key = re.findall(r'\d{3,}', real_url)
-            number = f'KIN8-{key[0]}' if key else number
+            key = key[0] if key else ""
+            assert isinstance(key, str)
+            number = f'KIN8-{key}' if key else number
         else:
             key = re.findall(r'KIN8(TENGOKU)?-?(\d{3,})', number.upper())
             key = key[0][1] if key else ''
+            assert isinstance(key, str)
             if not key:
                 debug_info = f'番号中未识别到 KIN8 番号: {number} '
                 log_info += web_info + debug_info
@@ -189,16 +190,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
-    print(main('kin8-3681'))
+    # print(main('kin8-3681'))
+    print(main(number="", appoint_url="https://www.kin8tengoku.com/moviepages/1232/index.html"))

@@ -10,13 +10,12 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 import models.core.file
 import models.core.image
 import models.core.scraper
-from models.base.file import copy_file, delete_file, split_path
+from models.base.file import delete_file, split_path
 from models.config.config import config
 from views.posterCutTool import Ui_Dialog_cut_poster
 
 
 class DraggableButton(QPushButton):
-
     def __init__(self, title, parent, cutwindow):
         super().__init__(title, parent)
         self.iniDragCor = [0, 0]
@@ -30,31 +29,23 @@ class DraggableButton(QPushButton):
     def mouseMoveEvent(self, e):
         x = e.x() - self.iniDragCor[0]
         y = e.y() - self.iniDragCor[1]
-        # 判断水平移动或竖直移动
-        if self.cutwindow.pic_h_w_ratio <= 1.5:
-            y = 0
-        else:
-            x = 0
-
         cor = QPoint(x, y)
-        self.move(self.mapToParent(cor))  # 需要maptoparent一下才可以的,否则只是相对位置。
+        target = self.mapToParent(cor)
+        if target.x() < 0:
+            target.setX(0)
+        if target.y() < 0:
+            target.setY(0)
+        self.move(target)  # 需要maptoparent一下才可以的,否则只是相对位置。
 
-        # self.show_traceback_log('drag button event,',time.time(),e.pos(),e.x(),e.y())
-
-        # 计算实际裁剪位置
-        c_x, c_y, c_x2, c_y2 = self.cutwindow.getRealPos()
-        # self.show_traceback_log('拖动：%s %s %s %s' % (str(c_x), str(c_y), str(c_x2), str(c_y2)))
+        # 更新实际裁剪位置
+        self.cutwindow.getRealPos()
 
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.m_drag = False
-        # 计算实际裁剪位置
-        c_x, c_y, c_x2, c_y2 = self.cutwindow.getRealPos()
-        # self.show_traceback_log('松开：%s %s %s %s' % (str(c_x), str(c_y), str(c_x2), str(c_y2)))
 
 
 class CutWindow(QDialog):
-
     def __init__(self, parent=None):
         super(CutWindow, self).__init__(parent)
         self.Ui = Ui_Dialog_cut_poster()  # 实例化 Ui
@@ -73,11 +64,10 @@ class CutWindow(QDialog):
         self.Ui.pushButton_select_cutrange.setGeometry(QRect(420, 0, 379, 539))
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
-        self.Ui.pushButton_select_cutrange.setStyleSheet(
-            u"background-color: rgba(200, 200, 200, 80);\n" 
-            "font-size:13px;\n" "font-weight:normal;" 
-            "color: rgba(0, 0, 0, 255);\n" 
-            "border:2px solid rgba(0, 55, 255, 255);\n")
+        self.Ui.pushButton_select_cutrange.setStyleSheet(u"background-color: rgba(200, 200, 200, 80);\n"
+                                                         "font-size:13px;\n" "font-weight:normal;"
+                                                         "color: rgba(0, 0, 0, 255);\n"
+                                                         "border:2px solid rgba(0, 55, 255, 255);\n")
         self.set_style()
         self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
         self.Ui.horizontalSlider_right.valueChanged.connect(self.change_postion_right)
@@ -89,8 +79,7 @@ class CutWindow(QDialog):
 
     def set_style(self):
         # 控件美化 裁剪弹窗
-        self.Ui.widget.setStyleSheet(
-            '''
+        self.Ui.widget.setStyleSheet('''
             * {
                 font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             }
@@ -130,55 +119,31 @@ class CutWindow(QDialog):
                 border-width:14px;
                 font-weight:bold;
             }
-            '''
-        )
+            ''')
 
     def change_postion_left(self):
+        # abc: 0-10000
         abc = self.Ui.horizontalSlider_left.value()
-        self.Ui.horizontalSlider_right.valueChanged.disconnect(self.change_postion_right)
-        self.Ui.horizontalSlider_right.setValue(10000 - abc)
-        self.Ui.horizontalSlider_right.valueChanged.connect(self.change_postion_right)
-
-        self.rect_x, self.rect_y, self.rect_w, self.rect_h = self.Ui.pushButton_select_cutrange.geometry().getRect()
-        self.rect_h_w_ratio = 1 + abc / 10000  # 更新高宽比
+        # 当前裁剪框位置. 左上角坐标 + 尺寸
+        x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
+        height = (abc + 1) / 10000 * self.pic_h
+        self.rect_h_w_ratio = height / width  # 更新高宽比
         self.Ui.label_cut_ratio.setText(str('%.2f' % self.rect_h_w_ratio))
-
-        # 计算裁剪框大小
-        if self.pic_h_w_ratio <= 1.5:  # 如果高宽比小时，固定高度，右边水平移动
-            self.rect_w1 = int(self.rect_h / self.rect_h_w_ratio)
-            self.rect_x = self.rect_x + self.rect_w - self.rect_w1
-            self.rect_w = self.rect_w1
-        else:
-            self.rect_h1 = int(self.rect_w * self.rect_h_w_ratio)
-            self.rect_y = self.rect_y + self.rect_h - self.rect_h1
-            self.rect_h = self.rect_h1
-        self.Ui.pushButton_select_cutrange.setGeometry(
-            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     def change_postion_right(self):
         abc = self.Ui.horizontalSlider_right.value()
-        self.Ui.horizontalSlider_left.valueChanged.disconnect(self.change_postion_left)
-        self.Ui.horizontalSlider_left.setValue(10000 - abc)
-        self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
-
-        self.rect_x, self.rect_y, self.rect_w, self.rect_h = self.Ui.pushButton_select_cutrange.geometry().getRect()
-        self.rect_h_w_ratio = 2 - abc / 10000  # 更新高宽比
+        x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
+        width = (abc + 1) / 10000 * self.pic_w
+        self.rect_h_w_ratio = height / width  # 更新高宽比
         self.Ui.label_cut_ratio.setText(str('%.2f' % self.rect_h_w_ratio))
-
-        # 计算裁剪框大小
-        if self.pic_h_w_ratio <= 1.5:  # 如果高宽比小时，固定高度，右边水平移动
-            self.rect_w = int(self.rect_h / self.rect_h_w_ratio)
-        else:
-            self.rect_h = int(self.rect_w * self.rect_h_w_ratio)
-        self.Ui.pushButton_select_cutrange.setGeometry(
-            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 打开图片选择框
     def open_image(self):
-        img_path, img_type = QFileDialog.\
-            getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
+        img_path, img_type = QFileDialog.getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
         if img_path:
             self.showimage(img_path)
 
@@ -212,9 +177,9 @@ class CutWindow(QDialog):
             self.pic_h = pic.height()
             self.Ui.label_origin_size.setText(str('%s, %s' % (str(self.pic_w), str(self.pic_h))))  # 显示原图尺寸
             self.pic_h_w_ratio = self.pic_h / self.pic_w  # 原图高宽比
-            abc = int((self.rect_h_w_ratio - 1) * 10000)
-            self.Ui.horizontalSlider_left.setValue(abc)  # 裁剪框左侧调整条的值（最大10000）
-            self.Ui.horizontalSlider_right.setValue(10000 - abc)  # 裁剪框右侧调整条的值（最大10000）和左侧的值反过来
+            # abc = int((self.rect_h_w_ratio - 1) * 10000)
+            # self.Ui.horizontalSlider_left.setValue(abc)  # 裁剪框左侧调整条的值（最大10000）
+            # self.Ui.horizontalSlider_right.setValue(10000 - abc)  # 裁剪框右侧调整条的值（最大10000）和左侧的值反过来
 
             # 背景图片等比缩放并显示
             if self.pic_h_w_ratio <= self.show_h / self.show_w:  # 水平撑满（图片高/宽 <= 显示区域高/显示区域宽）
@@ -243,8 +208,8 @@ class CutWindow(QDialog):
                         if '.nfo' in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data, movie_number, folder_old_path, file_name, file_ex, \
-                    sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path, copy_sub=False)
+                json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path,
+                                                                                                                                                        copy_sub=False)
 
             self.setWindowTitle(json_data.get('number') + ' 封面图片裁剪')  # 设置窗口标题
 
@@ -257,8 +222,7 @@ class CutWindow(QDialog):
             poster_path = os.path.join(img_folder, 'poster.jpg')
             if pic_name == 0:  # 文件名-poster.jpg
                 if '-' in img_name:
-                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(
-                        img_ex, '') + '-poster.jpg'
+                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(img_ex, '') + '-poster.jpg'
             thumb_path = poster_path.replace('poster.', 'thumb.')
             fanart_path = poster_path.replace('poster.', 'fanart.')
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
@@ -303,8 +267,7 @@ class CutWindow(QDialog):
             self.rect_h = int(self.rect_w * self.rect_h_w_ratio)  # 计算裁剪框的高度
             self.rect_x = 0  # 裁剪框左上角的x值
             self.rect_y = int((self.pic_new_h - self.rect_h) / 2)  # 裁剪框左上角的y值（默认垂直居中）
-        self.Ui.pushButton_select_cutrange.setGeometry(
-            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 计算在原图的裁剪位置
@@ -325,7 +288,7 @@ class CutWindow(QDialog):
             py = pic_new_h - ph1
 
         # 更新显示裁剪框
-        self.Ui.pushButton_select_cutrange.setGeometry(QRect(px, py, pw, ph))
+        self.Ui.pushButton_select_cutrange.setGeometry(px, py, pw, ph)
 
         # 计算实际裁剪位置(裁剪时用的是左上角和右下角的坐标)
         if self.keep_side == 'height':
@@ -363,8 +326,7 @@ class CutWindow(QDialog):
         self.c_y = int(self.c_y)
 
         # 显示实际裁剪位置
-        self.Ui.label_cut_postion.setText(
-            '%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
+        self.Ui.label_cut_postion.setText('%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
 
         # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
@@ -384,16 +346,10 @@ class CutWindow(QDialog):
         if not img_path or not os.path.exists(img_path):
             return
         thumb_path = self.cut_thumb_path  # 裁剪后的thumb路径
-        poster_path = self.cut_poster_path  # 裁剪后的poster路径
-        fanart_path = self.cut_fanart_path  # 裁剪后的fanart路径
         self.parent().img_path = img_path  # 裁剪后更新图片url，这样再次点击时才可以重新加载并裁剪
 
         # 读取配置信息
         mark_list = []
-        download_files = config.download_files
-        poster_mark = config.poster_mark
-        thumb_mark = config.thumb_mark
-        fanart_mark = config.fanart_mark
         if self.Ui.radioButton_add_4k.isChecked():
             mark_list.append('4K')
         elif self.Ui.radioButton_add_8k.isChecked():
@@ -418,41 +374,43 @@ class CutWindow(QDialog):
         img = img.convert('RGB')
         img_new_png = img.crop((self.c_x, self.c_y, self.c_x2, self.c_y2))
         try:
-            if os.path.exists(poster_path):
-                delete_file(poster_path)
+            if os.path.exists(self.cut_poster_path):
+                delete_file(self.cut_poster_path)
         except Exception as e:
             self.parent().show_log_text(" 🔴 Failed to remove old poster!\n    " + str(e))
             return False
-        img_new_png.save(poster_path, quality=95, subsampling=0)
-        img.close()
+        img_new_png.save(self.cut_poster_path, quality=95, subsampling=0)
         # poster加水印
-        if poster_mark == 1:
-            models.core.image.add_mark_thread(poster_path, mark_list)
+        if config.poster_mark == 1:
+            models.core.image.add_mark_thread(self.cut_poster_path, mark_list)
 
         # 清理旧的thumb
-        if 'thumb' in download_files:
+        if 'thumb' in config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file(thumb_path)
-                copy_file(img_path, thumb_path)
+                img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
-            if thumb_mark == 1:
+            if config.thumb_mark == 1:
                 models.core.image.add_mark_thread(thumb_path, mark_list)
         else:
             thumb_path = img_path
 
         # 清理旧的fanart
-        if ',fanart' in download_files:
-            if fanart_path != img_path:
-                if os.path.exists(fanart_path):
-                    delete_file(fanart_path)
-                copy_file(img_path, fanart_path)
+        if ',fanart' in config.download_files:
+            if self.cut_fanart_path != img_path:
+                if os.path.exists(self.cut_fanart_path):
+                    delete_file(self.cut_fanart_path)
+                img.save(self.cut_fanart_path, quality=95, subsampling=0)
             # fanart加水印
-            if fanart_mark == 1:
-                models.core.image.add_mark_thread(fanart_path, mark_list)
+            if config.fanart_mark == 1:
+                models.core.image.add_mark_thread(self.cut_fanart_path, mark_list)
+
+        img.close()
+        img_new_png.close()
 
         # 在主界面显示预览
-        self.parent().set_pixmap_thread(poster_path, thumb_path, poster_from='cut', cover_from='local')
+        self.parent().set_pixmap_thread(self.cut_poster_path, thumb_path, poster_from='cut', cover_from='local')
         self.parent().change_to_mainpage.emit('')
         return True
 

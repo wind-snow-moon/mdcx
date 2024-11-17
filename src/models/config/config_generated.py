@@ -10,8 +10,8 @@ class GeneratedConfig:
     Also used as default configuration
     """
     # modified_time
-    modified_time = r'2023-12-26 10:41:19'
-    version = 120231226
+    modified_time = r'2024-09-24 23:18:45'
+    version = 120240924
 
     # media
     media_path = r''
@@ -22,6 +22,7 @@ class GeneratedConfig:
     media_type = r'.mp4|.avi|.rmvb|.wmv|.mov|.mkv|.flv|.ts|.webm|.iso|.mpg'
     sub_type = r'.smi|.srt|.idx|.sub|.sup|.psb|.ssa|.ass|.usf|.xss|.ssf|.rt|.lrc|.sbv|.vtt|.ttml'
     scrape_softlink_path = r''
+    auto_link = 0
 
     # escape
     folders = r'JAV_output,examples'
@@ -70,7 +71,7 @@ class GeneratedConfig:
     website_suren = r'mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb'
     website_fc2 = r'fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav'
     website_oumei = r'theporndb,javdb,javbus,hdouban'
-    website_guochan = r'madouqu,mdtv,hdouban,cnmdb'
+    website_guochan = r'madouqu,mdtv,hdouban,cnmdb,javday'
     whole_fields = r'outline,actor,thumb,release,tag,'
     none_fields = r'wanted,'
     website_set = r'official,'
@@ -143,7 +144,7 @@ class GeneratedConfig:
     naming_media = r'number title'
     prevent_char = r''
     fields_rule = r'del_actor,del_char,'
-    suffix_sort = r'mosaic,cnword'
+    suffix_sort = r'mosaic,cnword,definition'
     actor_no_name = r'未知演员'
     release_rule = r'YYYY-MM-DD'
     folder_name_max = 60
@@ -177,11 +178,13 @@ class GeneratedConfig:
     server_type = r'emby'
     emby_url = r'http://192.168.5.191:8096'
     api_key = r'ee9a2f2419704257b1dd60b975f2d64e'
+    user_id = r''
     emby_on = r'actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,'
     use_database = 0
     info_database_path = r''
     gfriends_github = r'https://github.com/gfriends/gfriends'
     actor_photo_folder = r''
+    actor_photo_kodi_auto = 0
 
     # mark
     poster_mark = 1
@@ -201,15 +204,6 @@ class GeneratedConfig:
     proxy = r'127.0.0.1:7890'
     timeout = 10
     retry = 3
-    javbus_website = r''
-    javdb_website = r''
-    iqqtv_website = r''
-    avsex_website = r''
-    hdouban_website = r''
-    mdtv_website = r''
-    airavcc_website = r''
-    lulubar_website = r''
-    javlibrary_website = r''
     theporndb_api_token = r''
 
     # Cookies
@@ -246,6 +240,7 @@ extrafanart_folder = {extrafanart_folder}
 media_type = {media_type}
 sub_type = {sub_type}
 scrape_softlink_path = {scrape_softlink_path}
+auto_link = {auto_link}
 
 [escape]
 folders = {folders}
@@ -408,6 +403,7 @@ use_database = {use_database}
 info_database_path = {info_database_path}
 gfriends_github = {gfriends_github}
 actor_photo_folder = {actor_photo_folder}
+actor_photo_kodi_auto = {actor_photo_kodi_auto}
 
 [mark]
 poster_mark = {poster_mark}

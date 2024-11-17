@@ -670,6 +670,7 @@ def save_config(self):
     if config.emby_url and '://' not in config.emby_url:
         config.emby_url = 'http://' + config.emby_url
     config.api_key = self.Ui.lineEdit_api_key.text()  # emby密钥
+    config.user_id = self.Ui.lineEdit_user_id.text()  # emby用户ID
     config.actor_photo_folder = self.Ui.lineEdit_actor_photo_folder.text()  # 头像图片目录
     config.gfriends_github = self.Ui.lineEdit_net_actor_photo.text().strip(' /')  # gfriends github 项目地址
     config.info_database_path = self.Ui.lineEdit_actor_db_path.text()  # 信息数据库
@@ -716,6 +717,11 @@ def save_config(self):
         config.emby_on += 'actor_photo_auto,'
     if self.Ui.checkBox_actor_pic_replace.isChecked():
         config.emby_on += 'actor_replace,'
+
+    if self.Ui.checkBox_actor_photo_kodi.isChecked():
+        config.actor_photo_kodi_auto = 1
+    else:
+        config.actor_photo_kodi_auto = 0
     # endregion
 
     # region mark
@@ -807,7 +813,11 @@ def save_config(self):
 
     custom_website_name = self.Ui.comboBox_custom_website.currentText()
     custom_website_url = self.Ui.lineEdit_custom_website.text()
-    setattr(config, f"{custom_website_name}_website", custom_website_url)
+    if custom_website_url:
+        custom_website_url = custom_website_url.strip('/ ')
+        setattr(config, f"{custom_website_name}_website", custom_website_url)
+    elif hasattr(config, f"{custom_website_name}_website"):
+        delattr(config, f"{custom_website_name}_website")
     config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
     config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
     config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
@@ -893,15 +903,19 @@ def save_config(self):
         config.window_title = 'show'
     # endregion
 
+    if self.Ui.checkBox_create_link.isChecked():
+        config.auto_link = 1
+    else:
+        config.auto_link = 0
+
     config_folder = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
     if not os.path.exists(config_folder):
         config_folder = config.folder
     config.path = convert_path(os.path.join(config_folder, config.file))
     config.version = self.localversion
     config.save_config()
+    config.update_config()
 
-    # 根据设置页是否勾选同意, 改变文件清理按钮状态
-    self.checkBox_i_agree_clean_clicked()
     try:
         scrape_like_text = Flags.scrape_like_text
         if config.scrape_like == 'single':
@@ -910,13 +924,12 @@ def save_config(self):
             scrape_like_text += " · 软连接开"
         elif config.soft_link == 2:
             scrape_like_text += " · 硬连接开"
-        signal.show_log_text(
-            f' 🛠 当前配置：{config.path} 保存完成！\n '
-            f'📂 程序目录：{get_main_path()} \n '
-            f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
-            f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
-            f'🖥️ 系统信息：{platform.platform()} \n '
-            f'🐰 软件版本：{self.localversion} \n')
+        signal.show_log_text(f' 🛠 当前配置：{config.path} 保存完成！\n '
+                             f'📂 程序目录：{get_main_path()} \n '
+                             f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
+                             f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
+                             f'🖥️ 系统信息：{platform.platform()} \n '
+                             f'🐰 软件版本：{self.localversion} \n')
     except:
         signal.show_traceback_log(traceback.format_exc())
     try:

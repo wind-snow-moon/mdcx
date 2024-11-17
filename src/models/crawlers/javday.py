@@ -7,7 +7,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html, post_html
+from models.base.web import get_html
 from models.config.config import config
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 
@@ -28,14 +28,14 @@ def get_actor_photo(actor):
 
 
 def get_title(html):
-    result = html.xpath('//div[@class="blog-single"]/div/a/@title')
-    return result[0].replace('\t', '').strip(' .') if result else ''
+    result = html.xpath('//*[@id="videoInfo"]/div/h1')
+    return result[0].text if result else ''
 
 
 def get_some_info(html, title, file_path):
-    series_list = html.xpath('(//div[@class="category"])[1]/text()')
-    tag_list = html.xpath('(//div[@class="category"])[2]/a/text()')
-    actor_list = html.xpath('(//div[@class="category"])[3]/a/text()')
+    series_list = html.xpath('//*[@id="videoInfo"]/div/div/p[3]/span[2]/a/text()')
+    tag_list = html.xpath('//*[@id="videoInfo"]/div/div/p[1]/span[2]/a/text()')
+    actor_list = html.xpath('//*[@id="videoInfo"]/div/div/p[1]/span[2]/a/text()')
 
     # 未找到演员时，看热门演员是否在标题和各种信息里
     series = series_list[0] if series_list else ''
@@ -51,14 +51,14 @@ def get_some_info(html, title, file_path):
     new_actor_list = []
     [new_actor_list.append(i) for i in actor_list if i and i not in new_actor_list]
 
-    # 去除标签里的演员
-    for each in actor_list:
-        if each in tag_list:
-            tag_list.remove(each)
-    new_tag_list = []
-    [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
+    # # 去除标签里的演员
+    # for each in actor_list:
+    #     if each in tag_list:
+    #         tag_list.remove(each)
+    # new_tag_list = []
+    # [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
 
-    return series, ','.join(new_tag_list), ','.join(new_actor_list)
+    return series, ','.join(tag_list), ','.join(new_actor_list)
 
 
 def get_studio(series, tag, lable_list):
@@ -70,46 +70,46 @@ def get_studio(series, tag, lable_list):
     return ''
 
 
-def get_real_url(html, number, mdtv_url, file_path):
-    real_url = ''
-    a = re.search(r'(\d*[A-Z]{2,})\s*(\d{3,})', number)
-    real_number = number
-    if a:
-        real_number = a[1] + '-' + a[2]
-    result = html.xpath('//h4[@class="post-title"]')
-    cd = re.findall(r'((AV|EP)\d{1})', file_path.upper())
-    for each in result:
-        title = each.xpath('a/@title')[0].upper()
-        href = each.xpath('a/@href')[0]
-        title_1 = title.replace('.', '').replace('-', '').replace(' ', '')
-        number_1 = number.replace('.', '').replace('-', '').replace(' ', '')
-        if number in title or real_number in title or number_1 in title_1:
-            real_url = mdtv_url + href
-            if cd:
-                if cd[0][0] in title_1.upper():
-                    break
-            else:
-                break
-    return real_url
+# def get_real_url(html, number, javday_url, file_path):
+#     real_url = ''
+#     a = re.search(r'(\d*[A-Z]{2,})\s*(\d{3,})', number)
+#     real_number = number
+#     if a:
+#         real_number = a[1] + '-' + a[2]
+#     result = html.xpath('//h4[@class="post-title"]')
+#     cd = re.findall(r'((AV|EP)\d{1})', file_path.upper())
+#     for each in result:
+#         title = each.xpath('a/@title')[0].upper()
+#         href = each.xpath('a/@href')[0]
+#         title_1 = title.replace('.', '').replace('-', '').replace(' ', '')
+#         number_1 = number.replace('.', '').replace('-', '').replace(' ', '')
+#         if number in title or real_number in title or number_1 in title_1:
+#             real_url = javday_url + href
+#             if cd:
+#                 if cd[0][0] in title_1.upper():
+#                     break
+#             else:
+#                 break
+#     return real_url
 
 
-def get_cover(html, mdtv_url):
-    result = html.xpath('//div[@class="blog-single"]/div/a/img/@src')
+def get_cover(html, javday_url):
+    result = html.xpath('/html/head/meta[8]')
     if result:
-        result = result[0]
+        result = result[0].get("content")
         if 'http' not in result:
-            result = mdtv_url + result
+            result = javday_url + result
     return result if result else ''
 
 
-def get_year(release):
-    result = re.search(r'\d{4}', release)
-    return result[0] if result else release
+# def get_year(release):
+#     result = re.search(r'\d{4}', release)
+#     return result[0] if result else release
 
 
-def get_release(cover_url):
-    a = re.search(r'\/(\d{4})(\d{2})(\d{2})-', cover_url)
-    return '%s-%s-%s' % (a[1], a[2], a[3]) if a else ''
+# def get_release(cover_url):
+#     a = re.search(r'\/(\d{4})(\d{2})(\d{2})-', cover_url)
+#     return '%s-%s-%s' % (a[1], a[2], a[3]) if a else ''
 
 
 def get_tag(html):  # 获取演员
@@ -190,18 +190,15 @@ def get_real_title(title, number_list, lable_list, tag, actor, series):
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file_path='', appoint_number=''):
     lable_list = get_lable_list()
     start_time = time.time()
-    website_name = 'mdtv'
+    website_name = 'javday'
     req_web += '-> %s' % website_name
-    title = ''
-    cover_url = ''
     web_info = '\n       '
-    log_info += ' \n    🌐 mdtv'
+    log_info += ' \n    🌐 javday'
     debug_info = ''
 
-    mdtv_url = getattr(config, "mdtv_website", 'https://www.mdpjzip.xyz')
+    javday_url = getattr(config, "javday_website", 'https://javday.tv')
     real_url = appoint_url
-    search_url = f"{mdtv_url}/index.php/vodsearch/-------------.html"
-
+    real_html_content = ''
     try:
         # 处理番号
         number_list, filename_list = get_number_list(number, appoint_number, file_path)
@@ -210,38 +207,27 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list_new = list(set(total_number_list))
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
-                debug_info = '搜索地址: %s {"wd": %s}' % (search_url, number)
+                testNumberUrl = javday_url + f'/videos/{number}/'
+                debug_info = '搜索地址: %s {"wd": %s}' % (testNumberUrl, number)
                 log_info += web_info + debug_info
-                result, response = post_html(search_url, data={"wd": number}, keep=False)
+                result, html_content = get_html(testNumberUrl)
                 if not result:
-                    debug_info = '网络请求错误: %s' % response
-                    log_info += web_info + debug_info
-                    raise Exception(debug_info)
-                if '没有找到匹配数据' in response:
-                    debug_info = '搜索结果: 没有搜索内容'
+                    debug_info = '网络请求错误: %s' % html_content
                     log_info += web_info + debug_info
                 else:
+                    if '你似乎來到了沒有視頻存在的荒原' in html_content:
+                        debug_info = '找不到番号: %s' % number
+                        log_info += web_info + debug_info
+                        continue
+                    debug_info = '找到网页: %s' % testNumberUrl
+                    real_url = testNumberUrl
+                    real_html_content = html_content
                     break
             else:
                 raise Exception(debug_info)
 
-            detail_page = etree.fromstring(response, etree.HTMLParser())
-            real_url = get_real_url(detail_page, number, mdtv_url, file_path)
-            if real_url:
-                debug_info = '番号地址: %s ' % real_url
-                log_info += web_info + debug_info
-            else:
-                debug_info = '搜索结果: 未匹配到番号！'
-                log_info += web_info + debug_info
-                raise Exception(debug_info)
-
         if real_url:
-            result, html_content = get_html(real_url)
-            if not result:
-                debug_info = '网络请求错误: %s' % html_content
-                log_info += web_info + debug_info
-                raise Exception(debug_info)
-            html_info = etree.fromstring(html_content, etree.HTMLParser())
+            html_info = etree.fromstring(real_html_content, etree.HTMLParser())
             title = get_title(html_info)  # 获取标题
             if not title:
                 debug_info = '数据获取失败: 未获取到title！'
@@ -249,9 +235,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 raise Exception(debug_info)
             series, tag, actor = get_some_info(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
-            cover_url = get_cover(html_info, mdtv_url)  # 获取cover
-            release = get_release(cover_url)
-            year = get_year(release)
+            cover_url = get_cover(html_info, javday_url)  # 获取cover
+            release = ''
+            year = ''
             studio = get_studio(series, tag, lable_list)
             number, title = get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series)
 
@@ -273,7 +259,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     'director': '',
                     'studio': studio,
                     'publisher': studio,
-                    'source': 'mdtv',
+                    'source': 'javday',
                     'website': real_url,
                     'actor_photo': actor_photo,
                     'cover': cover_url,
@@ -366,4 +352,4 @@ if __name__ == '__main__':
     # print(main('', file_path='杏吧八戒1 - 3000约操18岁大一新生，苗条身材白嫩紧致.ts'))  # 分词匹配，带标点或者整个标题去匹配
     # print(main('', file_path='萝莉社 女大学生找模特兼职 被要求裸露拍摄 被套路内射.ts'))  # 分词匹配，带标点或者整个标题去匹配
     print(main('',
-               file_path='/sp/sp6/国产测试/RS-023 AV1.mp4'))  # print(main('MDM-002')) # 去掉标题最后的发行商  # print(main('MDS-0007')) # 数字要四位才能搜索到，即 MDS-0007 MDJ001 EP1 我的女优物语陈美惠.TS  # print(main('MDS-007', file_path='MDJ001 EP1 我的女优物语陈美惠.TS')) # 数字要四位才能搜索到，即 MDJ-0001.EP1  # print(main('91CM-090')) # 带横线才能搜到  # print(main('台湾SWAG chloebabe 剩蛋特辑 干爆小鹿'))   # 带空格才能搜到  # print(main('淫欲游戏王EP2'))  # 不带空格才能搜到  # print(main('台湾SWAG-chloebabe-剩蛋特輯-幹爆小鹿'))  # print(main('MD-0020'))  # print(main('mds009'))  # print(main('女王的SM调教'))  # print(main('91CM202'))  # print(main('必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts', file_path='必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts'))  # print(main('', file_path='素人自制舒舒 富婆偷情被偷拍 亏大了！50W买个视频还被操.ts'))  # print(main('', file_path='/sp/sp3/国产/2021年10月份 國產原創原版合集/20211003 91CM-191 你好同学ep5 MSD011/[c0e0.com]实战现场 .TS'))
+               file_path='/sp/sp6/国产测试/MD-0240 周處除三嗨.mp4'))  # print(main('MDM-002')) # 去掉标题最后的发行商  # print(main('MDS-0007')) # 数字要四位才能搜索到，即 MDS-0007 MDJ001 EP1 我的女优物语陈美惠.TS  # print(main('MDS-007', file_path='MDJ001 EP1 我的女优物语陈美惠.TS')) # 数字要四位才能搜索到，即 MDJ-0001.EP1  # print(main('91CM-090')) # 带横线才能搜到  # print(main('台湾SWAG chloebabe 剩蛋特辑 干爆小鹿'))   # 带空格才能搜到  # print(main('淫欲游戏王EP2'))  # 不带空格才能搜到  # print(main('台湾SWAG-chloebabe-剩蛋特輯-幹爆小鹿'))  # print(main('MD-0020'))  # print(main('mds009'))  # print(main('女王的SM调教'))  # print(main('91CM202'))  # print(main('必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts', file_path='必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts'))  # print(main('', file_path='素人自制舒舒 富婆偷情被偷拍 亏大了！50W买个视频还被操.ts'))  # print(main('', file_path='/sp/sp3/国产/2021年10月份 國產原創原版合集/20211003 91CM-191 你好同学ep5 MSD011/[c0e0.com]实战现场 .TS'))

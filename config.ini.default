@@ -1,6 +1,6 @@
 [modified_time]
-modified_time = 2023-12-26 10:41:19
-version = 120231226
+modified_time = 2024-09-24 23:18:45
+version = 120240924
 
 [media]
 media_path = 
@@ -11,6 +11,7 @@ extrafanart_folder = extrafanart_copy
 media_type = .mp4|.avi|.rmvb|.wmv|.mov|.mkv|.flv|.ts|.webm|.iso|.mpg
 sub_type = .smi|.srt|.idx|.sub|.sup|.psb|.ssa|.ass|.usf|.xss|.ssf|.rt|.lrc|.sbv|.vtt|.ttml
 scrape_softlink_path = 
+auto_link = 0
 
 [escape]
 folders = JAV_output,examples
@@ -59,7 +60,7 @@ website_wuma = iqqtv,javbus,freejavbt,jav321,avsox,7mmtv,hdouban,javdb,airav
 website_suren = mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb
 website_fc2 = fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav
 website_oumei = theporndb,javdb,javbus,hdouban
-website_guochan = madouqu,mdtv,hdouban,cnmdb
+website_guochan = madouqu,mdtv,hdouban,cnmdb,javday
 whole_fields = outline,actor,thumb,release,tag,
 none_fields = wanted,
 website_set = official,
@@ -132,7 +133,7 @@ naming_file = number
 naming_media = number title
 prevent_char = 
 fields_rule = del_actor,del_char,
-suffix_sort = mosaic,cnword
+suffix_sort = mosaic,cnword,definition
 actor_no_name = 未知演员
 release_rule = YYYY-MM-DD
 folder_name_max = 60
@@ -166,11 +167,13 @@ subtitle_add_rescrape = on
 server_type = emby
 emby_url = http://192.168.5.191:8096
 api_key = ee9a2f2419704257b1dd60b975f2d64e
+user_id = 
 emby_on = actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,
 use_database = 0
 info_database_path = 
 gfriends_github = https://github.com/gfriends/gfriends
 actor_photo_folder = 
+actor_photo_kodi_auto = 0
 
 [mark]
 poster_mark = 1
@@ -190,15 +193,6 @@ type = no
 proxy = 127.0.0.1:7890
 timeout = 10
 retry = 3
-javbus_website = 
-javdb_website = 
-iqqtv_website = 
-avsex_website = 
-hdouban_website = 
-mdtv_website = 
-airavcc_website = 
-lulubar_website = 
-javlibrary_website = 
 theporndb_api_token = 
 
 [Cookies]

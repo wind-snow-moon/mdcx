@@ -1,8 +1,6 @@
 import os
-import platform
 import re
 import shutil
-import sqlite3
 import threading
 import time
 import traceback
@@ -10,25 +8,22 @@ import webbrowser
 
 from PyQt5.QtCore import QEvent, QPoint, QTimer, Qt, pyqtSignal
 from PyQt5.QtGui import QCursor, QHoverEvent, QIcon, QKeySequence
-from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QInputDialog, QMainWindow, QMenu, QMessageBox, \
-    QShortcut, QTreeWidgetItem
+from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QInputDialog, QMainWindow, QMenu, QMessageBox, QShortcut, QTreeWidgetItem
 
 from controllers.cut_window import CutWindow
 from controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
 from controllers.main_window.load_config import load_config
 from controllers.main_window.save_config import save_config
 from controllers.main_window.style import set_dark_style, set_style
-from models.base.file import _open_file_thread, delete_file, move_file, split_path
+from models.base.file import _open_file_thread, delete_file, split_path
 from models.base.image import get_pixmap
 from models.base.number import get_info
 from models.base.path import get_main_path, get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
-from models.base.web import check_theporndb_api_token, check_version, get_avsox_domain, get_html, ping_host, \
-    scraper_html
+from models.base.web import check_theporndb_api_token, check_version, get_avsox_domain, get_html, ping_host, scraper_html
 from models.config.config import config
 from models.config.resources import resources
-from models.core.file import check_and_clean_files, get_success_list, movie_lists, \
-    newtdisk_creat_symlink, save_remain_list, save_success_list
+from models.core.file import check_and_clean_files, get_success_list, movie_lists, newtdisk_creat_symlink, save_remain_list, save_success_list
 from models.core.flags import Flags
 from models.core.image import add_del_extrafanart_copy
 from models.core.nfo import write_nfo
@@ -82,7 +77,7 @@ class MyMAinWindow(QMainWindow):
 
         # region 初始化需要的变量
         self.localversion = config.local_version  # 当前版本号
-        self.new_version = ''  # 有版本更新时在左下角显示的新版本信息
+        self.new_version = '\n🔍 点击检查最新版本'  # 有版本更新时在左下角显示的新版本信息
         self.json_data = {}  # 当前树状图选中文件的json_data
         self.img_path = ''  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
@@ -150,20 +145,19 @@ class MyMAinWindow(QMainWindow):
         self.show_scrape_info()  # 主界面左下角显示一些配置信息
         self.show_net_info('\n🏠 代理设置在:【设置】 - 【网络】 - 【代理设置】。\n')  # 检查网络界面显示提示信息
         show_netstatus()  # 检查网络界面显示当前网络代理信息
-        self.show_net_info(
-            '\n💡 说明：\n '
-            '任意代理：javbus、jav321、javlibrary、mgstage、mywife、giga、freejavbt、'
-            'mdtv、madouqu、7mmtv、faleno、dahlia、prestige、theporndb、cnmdb、fantastica、kin8\n '
-            '非日本代理：javdb、airav-cc、avsex（日本代理会报错）\n '
-            '日本代理：seesaawiki\n '
-            '无需代理：avsex、hdouban、iqqtv、airav-wiki、love6、lulubar、fc2、fc2club、fc2hub\n\n'
-            '▶️ 点击右上角 【开始检测】按钮以测试网络连通性。')  # 检查网络界面显示提示信息
+        self.show_net_info('\n💡 说明：\n '
+                           '任意代理：javbus、jav321、javlibrary、mywife、giga、freejavbt、'
+                           'mdtv、madouqu、7mmtv、faleno、dahlia、prestige、theporndb、cnmdb、fantastica、kin8\n '
+                           '非日本代理：javdb、airav-cc、avsex（日本代理会报错）\n '
+                           '日本代理：seesaawiki、mgstage\n '
+                           '无需代理：avsex、hdouban、iqqtv、airav-wiki、love6、lulubar、fc2、fc2club、fc2hub\n\n'
+                           '▶️ 点击右上角 【开始检测】按钮以测试网络连通性。')  # 检查网络界面显示提示信息
         signal.add_log("🍯 你可以点击左下角的图标来 显示 / 隐藏 请求信息面板！")
         self.show_version()  # 日志页面显示版本信息
         self.creat_right_menu()  # 加载右键菜单
         self.pushButton_main_clicked()  # 切换到主界面
         self.auto_start()  # 自动开始刮削
-        # self.load_langid()# 后台加载langid，第一次加载需要时间，预加载避免卡住
+        # self.load_langid() # 后台加载langid，第一次加载需要时间，预加载避免卡住
         # endregion
 
     # region Init
@@ -475,7 +469,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_min_clicked2(self):
         if not config.is_windows:
             self.setWindowFlag(Qt.FramelessWindowHint, False)  # 不隐藏边框
-            # self.show()                                                         # 加上后可以显示缩小动画
+            # self.show()  # 加上后可以显示缩小动画
         self.showMinimized()
 
     # 重置左侧按钮样式
@@ -483,33 +477,20 @@ class MyMAinWindow(QMainWindow):
         try:
             if self.dark_mode:
                 self.Ui.left_backgroud_widget.setStyleSheet(
-                    'background: #1F272F;border-right: 1px solid #20303F;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                        self.window_radius, self.window_radius))
-                self.Ui.pushButton_main.setStyleSheet(
-                    'QPushButton:hover#pushButton_main{color: white;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_log.setStyleSheet(
-                    'QPushButton:hover#pushButton_log{color: white;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_net.setStyleSheet(
-                    'QPushButton:hover#pushButton_net{color: white;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_tool.setStyleSheet(
-                    'QPushButton:hover#pushButton_tool{color: white;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_setting.setStyleSheet(
-                    'QPushButton:hover#pushButton_setting{color: white;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_about.setStyleSheet(
-                    'QPushButton:hover#pushButton_about{color: white;background-color: rgba(160,160,165,40);}')
+                    f'background: #1F272F;border-right: 1px solid #20303F;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
+                self.Ui.pushButton_main.setStyleSheet('QPushButton:hover#pushButton_main{color: white;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_log.setStyleSheet('QPushButton:hover#pushButton_log{color: white;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_net.setStyleSheet('QPushButton:hover#pushButton_net{color: white;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_tool.setStyleSheet('QPushButton:hover#pushButton_tool{color: white;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_setting.setStyleSheet('QPushButton:hover#pushButton_setting{color: white;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_about.setStyleSheet('QPushButton:hover#pushButton_about{color: white;background-color: rgba(160,160,165,40);}')
             else:
-                self.Ui.pushButton_main.setStyleSheet(
-                    'QPushButton:hover#pushButton_main{color: black;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_log.setStyleSheet(
-                    'QPushButton:hover#pushButton_log{color: black;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_net.setStyleSheet(
-                    'QPushButton:hover#pushButton_net{color: black;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_tool.setStyleSheet(
-                    'QPushButton:hover#pushButton_tool{color: black;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_setting.setStyleSheet(
-                    'QPushButton:hover#pushButton_setting{color: black;background-color: rgba(160,160,165,40);}')
-                self.Ui.pushButton_about.setStyleSheet(
-                    'QPushButton:hover#pushButton_about{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_main.setStyleSheet('QPushButton:hover#pushButton_main{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_log.setStyleSheet('QPushButton:hover#pushButton_log{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_net.setStyleSheet('QPushButton:hover#pushButton_net{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_tool.setStyleSheet('QPushButton:hover#pushButton_tool{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_setting.setStyleSheet('QPushButton:hover#pushButton_setting{color: black;background-color: rgba(160,160,165,40);}')
+                self.Ui.pushButton_about.setStyleSheet('QPushButton:hover#pushButton_about{color: black;background-color: rgba(160,160,165,40);}')
         except:
             signal.show_traceback_log(traceback.format_exc())
 
@@ -565,9 +546,8 @@ class MyMAinWindow(QMainWindow):
         """
         try:
             if self.label_number_url:
-                javdb_website = config.javdb_website
-                if javdb_website:
-                    self.label_number_url = self.label_number_url.replace('https://javdb.com', javdb_website)
+                if hasattr(config, 'javdb_website'):
+                    self.label_number_url = self.label_number_url.replace('https://javdb.com', config.javdb_website)
                 webbrowser.open(self.label_number_url)
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -578,16 +558,17 @@ class MyMAinWindow(QMainWindow):
         """
         try:
             if self.label_actor_url:
-                javdb_website = config.javdb_website
-                if javdb_website:
-                    self.label_actor_url = self.label_actor_url.replace('https://javdb.com', javdb_website)
+                if hasattr(config, 'javdb_website'):
+                    self.label_actor_url = self.label_actor_url.replace('https://javdb.com', config.javdb_website)
                 webbrowser.open(self.label_actor_url)
         except:
             signal.show_traceback_log(traceback.format_exc())
 
     def label_version_clicked(self, test):
         try:
-            if self.new_version:
+            if "🔍" in self.new_version:
+                webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/daily_release")
+            else:
                 webbrowser.open('https://github.com/sqzw-x/mdcx/releases')
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -597,40 +578,28 @@ class MyMAinWindow(QMainWindow):
     # region 左侧切换页面
     # 点左侧的主界面按钮
     def pushButton_main_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #F5F5F6;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #F5F5F6;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(0)
         self.set_left_button_style()
         self.Ui.pushButton_main.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
 
     # 点左侧的日志按钮
     def pushButton_show_log_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #EFFFFC;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #EFFFFC;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(1)
         self.set_left_button_style()
-        self.Ui.pushButton_log.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
-        self.Ui.textBrowser_log_main.verticalScrollBar().setValue(
-            self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
-        self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(
-            self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
+        self.Ui.pushButton_log.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')  # self.Ui.textBrowser_log_main.verticalScrollBar().setValue(  #     self.Ui.textBrowser_log_main.verticalScrollBar().maximum())  # self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(  #     self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
 
     # 点左侧的工具按钮
     def pushButton_tool_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #FFEFF6;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #FFEFF6;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(3)
         self.set_left_button_style()
         self.Ui.pushButton_tool.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
 
     # 点左侧的设置按钮
     def pushButton_setting_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #84CE9A;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #84CE9A;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(4)
         self.set_left_button_style()
         try:
@@ -644,18 +613,14 @@ class MyMAinWindow(QMainWindow):
 
     # 点击左侧【检测网络】按钮，切换到检测网络页面
     def pushButton_show_net_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #E1F2FF;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #E1F2FF;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(2)
         self.set_left_button_style()
         self.Ui.pushButton_net.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
 
     # 点左侧的关于按钮
     def pushButton_about_clicked(self):
-        self.Ui.left_backgroud_widget.setStyleSheet(
-            'background: #FFEFEF;border-right: 1px solid #EDEDED;border-top-left-radius: %spx;border-bottom-left-radius: %spx;' % (
-                self.window_radius, self.window_radius))
+        self.Ui.left_backgroud_widget.setStyleSheet(f'background: #FFEFEF;border-right: 1px solid #EDEDED;border-top-left-radius: {self.window_radius}px;border-bottom-left-radius: {self.window_radius}px;')
         self.Ui.stackedWidget.setCurrentIndex(5)
         self.set_left_button_style()
         self.Ui.pushButton_about.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
@@ -705,8 +670,7 @@ class MyMAinWindow(QMainWindow):
             Flags.rest_time_convert = Flags.rest_time_convert_
             if Flags.stop_other:
                 signal.show_scrape_info('⛔️ 已手动停止！')
-                signal.show_log_text(
-                    "⛔️ 已手动停止！\n================================================================================")
+                signal.show_log_text("⛔️ 已手动停止！\n================================================================================")
                 self.set_label_file_path.emit('⛔️ 已手动停止！')
                 return
             signal.exec_set_processbar.emit(0)
@@ -717,18 +681,13 @@ class MyMAinWindow(QMainWindow):
             else:
                 average_time = used_time
             signal.show_scrape_info('⛔️ 刮削已手动停止！')
-            self.set_label_file_path.emit(
-                '⛔️ 刮削已手动停止！\n   已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒' % (
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time))
-            signal.show_log_text(
-                '\n ⛔️ 刮削已手动停止！\n 😊 已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒，停止用时 %s 秒' % (
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time, self.stop_used_time))
+            self.set_label_file_path.emit('⛔️ 刮削已手动停止！\n   已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒' % (
+                Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time))
+            signal.show_log_text('\n ⛔️ 刮削已手动停止！\n 😊 已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒，停止用时 %s 秒' % (
+                Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time, self.stop_used_time))
             signal.show_log_text("================================================================================")
-            signal.show_log_text(
-                ' ⏰ Start time'.ljust(13) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S",
-                                                                 time.localtime(Flags.start_time)))
-            signal.show_log_text(
-                ' 🏁 End time'.ljust(13) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time)))
+            signal.show_log_text(' ⏰ Start time'.ljust(13) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.start_time)))
+            signal.show_log_text(' 🏁 End time'.ljust(13) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time)))
             signal.show_log_text(' ⏱ Used time'.ljust(13) + ': %sS' % used_time)
             signal.show_log_text(' 🍕 Per time'.ljust(13) + ': %sS' % average_time)
             signal.show_log_text("================================================================================")
@@ -752,17 +711,14 @@ class MyMAinWindow(QMainWindow):
         Flags.total_kills = len(new_thread_list)
         Flags.now_kill = 0
         start_time = time.time()
-        self.set_label_file_path.emit(
-            f'⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（1/{Flags.total_kills}）...')
-        signal.show_log_text(
-            f'\n ⛔️ {get_current_time()} 已停止添加新的刮削任务，正在停止已在运行的任务线程（{Flags.total_kills}）...')
+        self.set_label_file_path.emit(f'⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（1/{Flags.total_kills}）...')
+        signal.show_log_text(f'\n ⛔️ {get_current_time()} 已停止添加新的刮削任务，正在停止已在运行的任务线程（{Flags.total_kills}）...')
         signal.show_traceback_log(f"⛔️ 正在停止正在运行的任务线程 ({Flags.total_kills}) ...")
         i = 0
         for each in new_thread_list:
             i += 1
             signal.show_traceback_log(f'正在停止线程: {i}/{Flags.total_kills} {each.getName()} ...')
-        signal.show_traceback_log(
-            '线程正在停止中，请稍后...\n 🍯 停止时间与线程数量及线程正在执行的任务有关，比如正在执行网络请求、文件下载等IO操作时，需要等待其释放资源。。。\n')
+        signal.show_traceback_log('线程正在停止中，请稍后...\n 🍯 停止时间与线程数量及线程正在执行的任务有关，比如正在执行网络请求、文件下载等IO操作时，需要等待其释放资源。。。\n')
         signal.stop = True
         for each in new_thread_list:  # 线程池的线程
             if 'MDCx-Pool' not in each.getName():
@@ -772,8 +728,7 @@ class MyMAinWindow(QMainWindow):
 
         signal.stop = False
         self.stop_used_time = get_used_time(start_time)
-        signal.show_log_text(
-            ' 🕷 %s 已停止线程：%s/%s %s' % (get_current_time(), Flags.total_kills, Flags.total_kills, other_name))
+        signal.show_log_text(' 🕷 %s 已停止线程：%s/%s %s' % (get_current_time(), Flags.total_kills, Flags.total_kills, other_name))
         signal.show_traceback_log(f'所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n')
         signal.show_log_text(f' ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)')
         thread_remain_list = []
@@ -969,12 +924,7 @@ class MyMAinWindow(QMainWindow):
                 signal.show_traceback_log(traceback.format_exc())
 
     def set_pixmap_thread(self, poster_path='', thumb_path='', poster_from='', cover_from=''):
-        t = threading.Thread(target=self._set_pixmap, args=(
-            poster_path,
-            thumb_path,
-            poster_from,
-            cover_from,
-        ))
+        t = threading.Thread(target=self._set_pixmap, args=(poster_path, thumb_path, poster_from, cover_from,))
         t.start()
 
     def _set_pixmap(self, poster_path='', thumb_path='', poster_from='', cover_from=''):
@@ -1090,8 +1040,7 @@ class MyMAinWindow(QMainWindow):
             file_path = self.file_main_open_path
             main_file_name = split_path(file_path)[1]
             default_text = os.path.splitext(main_file_name)[0].upper()
-            text, ok = QInputDialog.getText(self, '输入番号重新刮削', f'文件名: {main_file_name}\n请输入番号:',
-                                            text=default_text)
+            text, ok = QInputDialog.getText(self, '输入番号重新刮削', f'文件名: {main_file_name}\n请输入番号:', text=default_text)
             if ok and text:
                 Flags.again_dic[file_path] = [text, '', '']
                 signal.show_scrape_info('💡 已添加刮削！%s' % get_current_time())
@@ -1105,11 +1054,10 @@ class MyMAinWindow(QMainWindow):
         if self._check_main_file_path():
             file_path = self.file_main_open_path
             main_file_name = split_path(file_path)[1]
-            text, ok = QInputDialog.getText(self, '输入网址重新刮削',
-                                            f'文件名: {main_file_name}\n支持网站:airav_cc、airav、avsex、avsox、dmm、getchu、fc2'
-                                            f'、fc2club、fc2hub、iqqtv、jav321、javbus、javdb、freejavbt、javlibrary、mdtv'
-                                            f'、madouqu、mgstage、7mmtv、xcity、mywife、giga、faleno、dahlia、fantastica'
-                                            f'、prestige、hdouban、lulubar、love6、cnmdb、theporndb、kin8\n请输入番号对应的网址（不是网站首页地址！！！是番号页面地址！！！）:')
+            text, ok = QInputDialog.getText(self, '输入网址重新刮削', f'文件名: {main_file_name}\n支持网站:airav_cc、airav、avsex、avsox、dmm、getchu、fc2'
+                                                                      f'、fc2club、fc2hub、iqqtv、jav321、javbus、javdb、freejavbt、javlibrary、mdtv'
+                                                                      f'、madouqu、mgstage、7mmtv、xcity、mywife、giga、faleno、dahlia、fantastica'
+                                                                      f'、prestige、hdouban、lulubar、love6、cnmdb、theporndb、kin8\n请输入番号对应的网址（不是网站首页地址！！！是番号页面地址！！！）:')
             if ok and text:
                 website, url = deal_url(text)
                 if website:
@@ -1264,7 +1212,7 @@ class MyMAinWindow(QMainWindow):
     def show_scrape_info(self, before_info=''):
         try:
             if Flags.file_mode == FileMode.Single:
-                scrape_info = '💡 单文件刮削\n💠 %s · %s' % (Flags.main_mode_text, self.Ui.comboBox_website.currentText())
+                scrape_info = '💡 单文件刮削\n💠 %s · %s' % (Flags.main_mode_text, self.Ui.comboBox_website_all.currentText())
             else:
                 scrape_info = '💠 %s · %s' % (Flags.main_mode_text, Flags.scrape_like_text)
                 if config.scrape_like == 'single':
@@ -1330,10 +1278,8 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_show_hide_logs.setIcon(QIcon(resources.hide_logs_icon))
             self.Ui.textBrowser_log_main_2.show()
             self.Ui.textBrowser_log_main.resize(790, 418)
-            self.Ui.textBrowser_log_main.verticalScrollBar().setValue(
-                self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
-            self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(
-                self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
+            self.Ui.textBrowser_log_main.verticalScrollBar().setValue(self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
+            self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
 
             # self.Ui.textBrowser_log_main_2.moveCursor(self.Ui.textBrowser_log_main_2.textCursor().End)
 
@@ -1341,8 +1287,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_show_hide_logs.setIcon(QIcon(resources.show_logs_icon))
             self.Ui.textBrowser_log_main_2.hide()
             self.Ui.textBrowser_log_main.resize(790, 689)
-            self.Ui.textBrowser_log_main.verticalScrollBar().setValue(
-                self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
+            self.Ui.textBrowser_log_main.verticalScrollBar().setValue(self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
 
     # 日志页点展开折叠失败列表
     def pushButton_show_hide_failed_list_clicked(self):
@@ -1357,8 +1302,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.textBrowser_log_main_3.show()
             self.Ui.pushButton_scraper_failed_list.show()
             self.Ui.pushButton_save_failed_list.show()
-            self.Ui.textBrowser_log_main_3.verticalScrollBar().setValue(
-                self.Ui.textBrowser_log_main_3.verticalScrollBar().maximum())
+            self.Ui.textBrowser_log_main_3.verticalScrollBar().setValue(self.Ui.textBrowser_log_main_3.verticalScrollBar().maximum())
 
         else:
             self.Ui.pushButton_save_failed_list.hide()
@@ -1376,8 +1320,7 @@ class MyMAinWindow(QMainWindow):
         if len(Flags.failed_file_list) or True:
             log_name = 'failed_' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.txt'
             log_name = convert_path(os.path.join(get_movie_path_setting()[0], log_name))
-            filename, filetype = QFileDialog.getSaveFileName(None, "保存失败文件列表", log_name, "Text Files (*.txt)",
-                                                             options=self.options)
+            filename, filetype = QFileDialog.getSaveFileName(None, "保存失败文件列表", log_name, "Text Files (*.txt)", options=self.options)
             if filename:
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write(self.Ui.textBrowser_log_main_3.toPlainText().strip())
@@ -1421,7 +1364,7 @@ class MyMAinWindow(QMainWindow):
                 self.logs_counts = 0
                 self.main_logs_clear.emit('')
                 self.main_logs_show.emit(add_html(' 🗑️ 日志过多，已清屏！'))
-            # self.show_traceback_log(self.Ui.textBrowser_log_main.document().lineCount())
+                # self.show_traceback_log(self.Ui.textBrowser_log_main.document().lineCount())
 
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -1478,13 +1421,11 @@ class MyMAinWindow(QMainWindow):
         """
         self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
 
-        if bool('copy_netdisk_nfo' in config.switch_on) != bool(
-                self.Ui.checkBox_copy_netdisk_nfo.isChecked()):
+        if bool('copy_netdisk_nfo' in config.switch_on) != bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()):
             self.pushButton_save_config_clicked()
 
         try:
-            t = threading.Thread(target=newtdisk_creat_symlink,
-                                 args=(bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()),))
+            t = threading.Thread(target=newtdisk_creat_symlink, args=(bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()),))
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except:
@@ -1499,8 +1440,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
 
         # 如果本地资源库或演员与配置内容不同，则自动保存
-        if self.Ui.lineEdit_actors_name.text() != config.actors_name \
-                or self.Ui.lineEdit_local_library_path.text() != config.local_library:
+        if self.Ui.lineEdit_actors_name.text() != config.actors_name or self.Ui.lineEdit_local_library_path.text() != config.local_library:
             self.pushButton_save_config_clicked()
         try:
             t = threading.Thread(target=check_missing_number, args=(True,))
@@ -1515,7 +1455,9 @@ class MyMAinWindow(QMainWindow):
         media_path = self.Ui.lineEdit_movie_path.text()  # 获取待刮削目录作为打开目录
         if not media_path:
             media_path = get_main_path()
-        file_path, filetype = QFileDialog.getOpenFileName(None, "选取视频文件", media_path,
+        file_path, filetype = QFileDialog.getOpenFileName(None,
+                                                          "选取视频文件",
+                                                          media_path,
                                                           "Movie Files(*.mp4 " "*.avi *.rmvb *.wmv " "*.mov *.mkv *.flv *.ts " "*.webm *.MP4 *.AVI " "*.RMVB *.WMV *.MOV " "*.MKV *.FLV *.TS " "*.WEBM);;All Files(*)",
                                                           options=self.options)
         if file_path:
@@ -1535,13 +1477,15 @@ class MyMAinWindow(QMainWindow):
             signal.show_scrape_info('💡 请填写番号网址！')  # 主界面左下角显示信息
             return
 
-        if not self.Ui.comboBox_website.currentIndex():
-            signal.show_scrape_info('💡 请选择刮削网站！')  # 主界面左下角显示信息
-            return
-
         self.pushButton_show_log_clicked()  # 点击刮削按钮后跳转到日志页面
         Flags.appoint_url = self.Ui.lineEdit_appoint_url.text().strip()
-        Flags.website_name = self.Ui.comboBox_website.currentText()
+        # 单文件刮削从用户输入的网址中识别网址名，复用现成的逻辑=>主页面输入网址刮削
+        website, url = deal_url(Flags.appoint_url)
+        if website:
+            Flags.website_name = website
+        else:
+            signal.show_scrape_info('💡 不支持的网站！%s' % get_current_time())
+            return
         start_new_scrape(FileMode.Single)
 
     def pushButton_select_file_clear_info_clicked(self):  # 点清空信息
@@ -1549,16 +1493,13 @@ class MyMAinWindow(QMainWindow):
         self.Ui.lineEdit_appoint_url.setText('')
 
         # self.Ui.lineEdit_movie_number.setText('')
-        self.Ui.comboBox_website.setCurrentIndex(0)
 
     # 工具-裁剪封面图
     def pushButton_select_thumb_clicked(self):
         path = self.Ui.lineEdit_movie_path.text()
         if not path:
             path = get_main_path()
-        file_path, fileType = QFileDialog.getOpenFileName(None, "选取缩略图", path,
-                                                          "Picture Files(*.jpg *.png);;All Files(*)",
-                                                          options=self.options)
+        file_path, fileType = QFileDialog.getOpenFileName(None, "选取缩略图", path, "Picture Files(*.jpg *.png);;All Files(*)", options=self.options)
         if file_path != '':
             self.cutwindow.showimage(file_path)
             self.cutwindow.show()
@@ -1616,7 +1557,8 @@ class MyMAinWindow(QMainWindow):
             file_name = split_path(file_path)[1]
             file_ext = os.path.splitext(file_name)[1]
             try:
-                move_file(file_path, des_path)
+                # move_file(file_path, des_path)
+                shutil.move(file_path, des_path)
                 if file_ext in movie_type:
                     signal.show_log_text('   Move movie: ' + file_name + ' to Movie_moved Success!')
                 else:
@@ -1677,7 +1619,7 @@ class MyMAinWindow(QMainWindow):
         media_folder_path = convert_path(self._get_select_folder_path())
         if media_folder_path and media_folder_path != config.folder:
             config_path = os.path.join(media_folder_path, 'config.ini')
-            with open('MDCx.config', 'w', encoding='UTF-8') as f:
+            with open(config.get_mark_file_path(), 'w', encoding='UTF-8') as f:
                 f.write(config_path)
             if os.path.isfile(config_path):
                 temp_dark = self.dark_mode
@@ -1956,9 +1898,8 @@ class MyMAinWindow(QMainWindow):
     def config_file_change(self, new_config_file):
         if new_config_file != config.file:
             new_config_path = os.path.join(config.folder, new_config_file)
-            signal.show_log_text(
-                '\n================================================================================\n切换配置：%s' % new_config_path)
-            with open('MDCx.config', 'w', encoding='UTF-8') as f:
+            signal.show_log_text('\n================================================================================\n切换配置：%s' % new_config_path)
+            with open(config.get_mark_file_path(), 'w', encoding='UTF-8') as f:
                 f.write(new_config_path)
             temp_dark = self.dark_mode
             temp_window_radius = self.window_radius
@@ -2001,7 +1942,8 @@ class MyMAinWindow(QMainWindow):
     def _check_mac_config_folder(self):
         if self.check_mac and not config.is_windows and '.app/Contents/Resources' in config.folder:
             self.check_mac = False
-            box = QMessageBox(QMessageBox.Warning, '选择配置文件目录',
+            box = QMessageBox(QMessageBox.Warning,
+                              '选择配置文件目录',
                               f'检测到当前配置文件目录为：\n {config.folder}\n\n由于 MacOS 平台在每次更新 APP 版本时会覆盖该目录的配置，因此请选择其他的配置目录！\n这样下次更新 APP 时，选择相同的配置目录即可读取你之前的配置！！！')
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.button(QMessageBox.Yes).setText('选择目录')
@@ -2035,7 +1977,7 @@ class MyMAinWindow(QMainWindow):
     # endregion
 
     # region 检测网络
-    def _netResult(self):
+    def network_check(self):
         start_time = time.time()
         try:
             # 显示代理信息
@@ -2044,171 +1986,145 @@ class MyMAinWindow(QMainWindow):
             # 检测网络连通性
             signal.show_net_info(' 开始检测网络连通性...')
 
-            javbus_url = 'https://www.javbus.com'
-            javdb_url = 'https://javdb.com'
-            hdouban_url = 'https://hdouban.com'
-            mdtv_url = 'https://www.mdpjzip.xyz'
-            airavcc_url = 'https://airav5.fun'
-            lulubar_url = 'https://lulubar.co'
-            iqqtv_url = 'https://iqq5.xyz'
-            avsex_url = 'https://paycalling.com'
-            javlibrary_url = 'https://www.javlibrary.com'
-            javbus_website = config.javbus_website
-            javdb_website = config.javdb_website
-            hdouban_website = config.hdouban_website
-            mdtv_website = config.mdtv_website
-            airavcc_website = config.airavcc_website
-            lulubar_website = config.lulubar_website
-            iqqtv_website = config.iqqtv_website
-            avsex_website = config.avsex_website
-            javlibrary_website = config.javlibrary_website
-            if javbus_website:
-                javbus_url = javbus_website
-            if javdb_website:
-                javdb_url = javdb_website + '/v/D16Q5?locale=zh'
-            else:
-                javdb_url = javdb_url + '/v/D16Q5?locale=zh'
-            if hdouban_website:
-                hdouban_url = hdouban_website
-            if mdtv_website:
-                mdtv_url = mdtv_website
-            if airavcc_website:
-                airavcc_url = airavcc_website
-            if lulubar_website:
-                lulubar_url = lulubar_website
-            if iqqtv_website:
-                iqqtv_url = iqqtv_website
-            if avsex_website:
-                avsex_url = avsex_website
-            if javlibrary_website:
-                javlibrary_url = javlibrary_website
-            net_info = [
-                ['github', 'https://raw.githubusercontent.com', ''],
-                ['airav_cc', airavcc_url + '/jp/playon.aspx?hid=44733', ''],
-                ['iqqtv', iqqtv_url, ''],
-                ['avsex', avsex_url, ''],
-                ['freejavbt', 'https://freejavbt.com', ''],
-                ['javbus', javbus_url, ''],
-                ['javdb', javdb_url, ''],
-                ['jav321', 'https://www.jav321.com', ''],
-                ['javlibrary', javlibrary_url + '/cn/?v=javme2j2tu', ''],
-                ['dmm', 'https://www.dmm.co.jp', ''],
-                ['mgstage', 'https://www.mgstage.com', ''],
-                ['getchu', 'http://www.getchu.com', ''],
-                ['theporndb', 'https://api.metadataapi.net', ''],
-                ['avsox', get_avsox_domain(), ''],
-                ['xcity', 'https://xcity.jp', ''],
-                ['7mmtv', 'https://7mmtv.tv', ''],
-                ['hdouban', hdouban_url, ''],
-                ['mdtv', mdtv_url, ''],
-                ['madouqu', 'https://madouqu.com', ''],
-                ['cnmdb', 'https://cnmdb.net', ''],
-                ['lulubar', lulubar_url, ''],
-                ['love6', 'https://love6.tv', ''],
-                ['yesjav', 'http://www.yesjav.info', ''],
-                ['fc2', 'https://adult.contents.fc2.com', ''],
-                ['fc2club', 'https://fc2club.top', ''],
-                ['fc2hub', 'https://fc2hub.com', ''],
-                ['airav', 'https://www.airav.wiki', ''],
-                ['av-wiki', 'https://av-wiki.net', ''],
-                ['seesaawiki', 'https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5', ''],
-                ['mywife', 'https://mywife.cc', ''],
-                ['giga', 'https://www.giga-web.jp', ''],
-                ['kin8', 'https://www.kin8tengoku.com/moviepages/3681/index.html', ''],
-                ['fantastica', 'http://fantastica-vr.com', ''],
-                ['faleno', 'https://faleno.jp', ''],
-                ['dahlia', 'https://dahlia-av.jp', ''],
-                ['prestige', 'https://www.prestige-av.com', ''],
-                ['s1s1s1', 'https://s1s1s1.com', ''],
-                ['moodyz', 'https://moodyz.com', ''],
-                ['madonna', 'https://www.madonna-av.com', ''],
-                ['wanz-factory', 'https://www.wanz-factory.com', ''],
-                ['ideapocket', 'https://ideapocket.com', ''],
-                ['kirakira', 'https://kirakira-av.com', ''],
-                ['ebody', 'https://www.av-e-body.com', ''],
-                ['bi-av', 'https://bi-av.com', ''],
-                ['premium', 'https://premium-beauty.com', ''],
-                ['miman', 'https://miman.jp', ''],
-                ['tameikegoro', 'https://tameikegoro.jp', ''],
-                ['fitch', 'https://fitch-av.com', ''],
-                ['kawaiikawaii', 'https://kawaiikawaii.jp', ''],
-                ['befreebe', 'https://befreebe.com', ''],
-                ['muku', 'https://muku.tv', ''],
-                ['attackers', 'https://attackers.net', ''],
-                ['mko-labo', 'https://mko-labo.net', ''],
-                ['dasdas', 'https://dasdas.jp', ''],
-                ['mvg', 'https://mvg.jp', ''],
-                ['opera', 'https://av-opera.jp', ''],
-                ['oppai', 'https://oppai-av.com', ''],
-                ['v-av', 'https://v-av.com', ''],
-                ['to-satsu', 'https://to-satsu.com', ''],
-                ['bibian', 'https://bibian-av.com', ''],
-                ['honnaka', 'https://honnaka.jp', ''],
-                ['rookie', 'https://rookie-av.jp', ''],
-                ['nanpa', 'https://nanpa-japan.jp', ''],
-                ['hajimekikaku', 'https://hajimekikaku.com', ''],
-                ['hhh-av', 'https://hhh-av.com', ''],
-            ]
-            for each in net_info:
-                host_address = each[1].replace('https://', '').replace('http://', '').split('/')[0]
-                if each[0] == 'javdb':
+            net_info = {
+                'github': ['https://raw.githubusercontent.com', ''],
+                'airav_cc': ['https://airav.io', ''],
+                'iqqtv': ['https://iqq5.xyz', ''],
+                'avsex': ['https://paycalling.com', ''],
+                'freejavbt': ['https://freejavbt.com', ''],
+                'javbus': ['https://www.javbus.com', ''],
+                'javdb': ['https://javdb.com', ''],
+                'jav321': ['https://www.jav321.com', ''],
+                'javlibrary': ['https://www.javlibrary.com', ''],
+                'dmm': ['https://www.dmm.co.jp', ''],
+                'mgstage': ['https://www.mgstage.com', ''],
+                'getchu': ['http://www.getchu.com', ''],
+                'theporndb': ['https://api.theporndb.net', ''],
+                'avsox': [get_avsox_domain(), ''],
+                'xcity': ['https://xcity.jp', ''],
+                '7mmtv': ['https://7mmtv.sx', ''],
+                'mdtv': ['https://www.mdpjzip.xyz', ''],
+                'madouqu': ['https://madouqu.com', ''],
+                'cnmdb': ['https://cnmdb.net', ''],
+                'hscangku': ['https://hscangku.net', ''],
+                'cableav': ['https://cableav.tv', ''],
+                'lulubar': ['https://lulubar.co', ''],
+                'love6': ['https://love6.tv', ''],
+                'yesjav': ['http://www.yesjav.info', ''],
+                'fc2': ['https://adult.contents.fc2.com', ''],
+                'fc2club': ['https://fc2club.top', ''],
+                'fc2hub': ['https://javten.com', ''],
+                'airav': ['https://www.airav.wiki', ''],
+                'av-wiki': ['https://av-wiki.net', ''],
+                'seesaawiki': ['https://seesaawiki.jp', ''],
+                'mywife': ['https://mywife.cc', ''],
+                'giga': ['https://www.giga-web.jp', ''],
+                'kin8': ['https://www.kin8tengoku.com', ''],
+                'fantastica': ['http://fantastica-vr.com', ''],
+                'faleno': ['https://faleno.jp', ''],
+                'dahlia': ['https://dahlia-av.jp', ''],
+                'prestige': ['https://www.prestige-av.com', ''],
+                's1s1s1': ['https://s1s1s1.com', ''],
+                'moodyz': ['https://moodyz.com', ''],
+                'madonna': ['https://www.madonna-av.com', ''],
+                'wanz-factory': ['https://www.wanz-factory.com', ''],
+                'ideapocket': ['https://ideapocket.com', ''],
+                'kirakira': ['https://kirakira-av.com', ''],
+                'ebody': ['https://www.av-e-body.com', ''],
+                'bi-av': ['https://bi-av.com', ''],
+                'premium': ['https://premium-beauty.com', ''],
+                'miman': ['https://miman.jp', ''],
+                'tameikegoro': ['https://tameikegoro.jp', ''],
+                'fitch': ['https://fitch-av.com', ''],
+                'kawaiikawaii': ['https://kawaiikawaii.jp', ''],
+                'befreebe': ['https://befreebe.com', ''],
+                'muku': ['https://muku.tv', ''],
+                'attackers': ['https://attackers.net', ''],
+                'mko-labo': ['https://mko-labo.net', ''],
+                'dasdas': ['https://dasdas.jp', ''],
+                'mvg': ['https://mvg.jp', ''],
+                'opera': ['https://av-opera.jp', ''],
+                'oppai': ['https://oppai-av.com', ''],
+                'v-av': ['https://v-av.com', ''],
+                'to-satsu': ['https://to-satsu.com', ''],
+                'bibian': ['https://bibian-av.com', ''],
+                'honnaka': ['https://honnaka.jp', ''],
+                'rookie': ['https://rookie-av.jp', ''],
+                'nanpa': ['https://nanpa-japan.jp', ''],
+                'hajimekikaku': ['https://hajimekikaku.com', ''],
+                'hhh-av': ['https://hhh-av.com', '']
+            }
+
+            for website in config.SUPPORTED_WEBSITES:
+                if hasattr(config, f"{website}_website"):
+                    signal.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
+                    net_info[website][0] = getattr(config, f"{website}_website")
+
+            net_info['javdb'][0] += '/v/D16Q5?locale=zh'
+            net_info['seesaawiki'][0] += '/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5'
+            net_info['airav_cc'][0] += '/playon.aspx?hid=44733'
+            net_info['javlibrary'][0] += '/cn/?v=javme2j2tu'
+            net_info['kin8'][0] += '/moviepages/3681/index.html'
+
+            for name, each in net_info.items():
+                host_address = each[0].replace('https://', '').replace('http://', '').split('/')[0]
+                if name == 'javdb':
                     res_javdb = self._check_javdb_cookie()
-                    each[2] = res_javdb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'javbus':
+                    each[1] = res_javdb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'javbus':
                     res_javbus = self._check_javbus_cookie()
-                    each[2] = res_javbus.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'theporndb':
+                    each[1] = res_javbus.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'theporndb':
                     res_theporndb = check_theporndb_api_token()
-                    each[2] = res_theporndb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'javlibrary':
+                    each[1] = res_theporndb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'javlibrary':
                     proxies = True
-                    if javlibrary_website:
+                    if hasattr(config, f"javlibrary_website"):
                         proxies = False
-                    result, html_info = scraper_html(each[1], proxies=proxies)
+                    result, html_info = scraper_html(each[0], proxies=proxies)
                     if not result:
-                        each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
+                        each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
                     elif 'Cloudflare' in html_info:
-                        each[2] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
+                        each[1] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
                     else:
-                        each[2] = f'✅ 连接正常{ping_host(host_address)}'
-                elif each[0] in ['avsex', 'freejavbt', 'airav_cc', 'airav', 'madouqu', '7mmtv']:
-                    result, html_info = scraper_html(each[1])
+                        each[1] = f'✅ 连接正常{ping_host(host_address)}'
+                elif name in ['avsex', 'freejavbt', 'airav_cc', 'airav', 'madouqu', '7mmtv']:
+                    result, html_info = scraper_html(each[0])
                     if not result:
-                        each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
+                        each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
                     elif 'Cloudflare' in html_info:
-                        each[2] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
+                        each[1] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
                     else:
-                        each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                        each[1] = f'✅ 连接正常{ping_host(host_address)}'
                 else:
                     try:
-                        result, html_content = get_html(each[1])
+                        result, html_content = get_html(each[0])
                         if not result:
-                            each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + str(html_content)
+                            each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + str(html_content)
                         else:
-                            if each[0] == 'dmm':
+                            if name == 'dmm':
                                 if re.findall('このページはお住まいの地域からご利用になれません', html_content):
-                                    each[2] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
+                                    each[1] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
                                 else:
-                                    each[2] = f'✅ 连接正常{ping_host(host_address)}'
-                            elif each[0] == 'mgstage':
+                                    each[1] = f'✅ 连接正常{ping_host(host_address)}'
+                            elif name == 'mgstage':
                                 if not html_content.strip():
-                                    each[2] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
+                                    each[1] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
                                 else:
-                                    each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                                    each[1] = f'✅ 连接正常{ping_host(host_address)}'
                             else:
-                                each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                                each[1] = f'✅ 连接正常{ping_host(host_address)}'
                     except Exception as e:
-                        each[2] = '测试连接时出现异常！信息:' + str(e)
+                        each[1] = '测试连接时出现异常！信息:' + str(e)
                         signal.show_traceback_log(traceback.format_exc())
                         signal.show_net_info(traceback.format_exc())
-                signal.show_net_info('   ' + each[0].ljust(12) + each[2])
+                signal.show_net_info('   ' + name.ljust(12) + each[1])
             signal.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
             signal.show_net_info("================================================================================\n")
         except:
             if signal.stop:
                 signal.show_net_info('\n⛔️ 当前有刮削任务正在停止中，请等待刮削停止后再进行检测！')
-                signal.show_net_info(
-                    "================================================================================\n")
+                signal.show_net_info("================================================================================\n")
         self.Ui.pushButton_check_net.setEnabled(True)
         self.Ui.pushButton_check_net.setText('开始检测')
         self.Ui.pushButton_check_net.setStyleSheet(
@@ -2221,7 +2137,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_check_net.setStyleSheet(
                 'QPushButton#pushButton_check_net{color: white;background-color: rgba(230, 36, 0, 250);}QPushButton:hover#pushButton_check_net{color: white;background-color: rgba(247, 36, 0, 250);}QPushButton:pressed#pushButton_check_net{color: white;background-color: rgba(180, 0, 0, 250);}')
             try:
-                self.t_net = threading.Thread(target=self._netResult)
+                self.t_net = threading.Thread(target=self.network_check)
                 self.t_net.start()  # 启动线程,即让线程开始执行
             except:
                 signal.show_traceback_log(traceback.format_exc())
@@ -2274,15 +2190,11 @@ class MyMAinWindow(QMainWindow):
             return tips
         # self.Ui.pushButton_check_javdb_cookie.setEnabled(False)
         tips = '✅ 连接正常！'
-        new_cookie = {'cookie': input_cookie}
-        cookies = config.javdb_cookie
-        javdb_website = config.javdb_website
-        if javdb_website:
-            javdb_url = javdb_website + '/v/D16Q5?locale=zh'
-        else:
-            javdb_url = 'https://javdb.com/v/D16Q5?locale=zh'
+        header = {'cookie': input_cookie}
+        cookies = config.javdb
+        javdb_url = getattr(config, 'javdb_website', 'https://javdb.com') + '/v/D16Q5?locale=zh'
         try:
-            result, response = scraper_html(javdb_url, cookies=new_cookie)
+            result, response = scraper_html(javdb_url, headers=header)
             if not result:
                 if 'Cookie' in response:
                     if cookies != input_cookie:
@@ -2348,15 +2260,9 @@ class MyMAinWindow(QMainWindow):
         new_cookie = {'cookie': input_cookie}
         cookies = config.javbus
         headers_o = config.headers
-        headers = {
-            'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
-        }
+        headers = {'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6', }
         headers.update(headers_o)
-        javbus_website = config.javbus_website
-        if javbus_website:
-            javbus_url = javbus_website + '/FSDSS-660'
-        else:
-            javbus_url = 'https://javbus.com/FSDSS-660'
+        javbus_url = getattr(config, 'javbus_website', 'https://javbus.com') + '/FSDSS-660'
 
         try:
             result, response = get_html(javbus_url, headers=headers, cookies=new_cookie)
@@ -2508,11 +2414,9 @@ class MyMAinWindow(QMainWindow):
             time.sleep(0.1)
             timed_interval = config.timed_interval
             self.atuo_scrape_count += 1
-            signal.show_log_text(
-                f'\n\n 🍔 已启用「循环刮削」！间隔时间：{timed_interval}！即将开始第 {self.atuo_scrape_count} 次循环刮削！')
+            signal.show_log_text(f'\n\n 🍔 已启用「循环刮削」！间隔时间：{timed_interval}！即将开始第 {self.atuo_scrape_count} 次循环刮削！')
             if Flags.scrape_start_time:
-                signal.show_log_text(
-                    ' ⏰ 上次刮削时间: ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.scrape_start_time)))
+                signal.show_log_text(' ⏰ 上次刮削时间: ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.scrape_start_time)))
             start_new_scrape(FileMode.Default)
 
     def auto_start(self):

@@ -814,6 +814,9 @@ def load_config(self):
         self.Ui.checkBox_cd_part_c.setChecked('endc' in cd_char)
         self.Ui.checkBox_cd_part_01.setChecked('digital' in cd_char)  # 允许分集识别数字
         self.Ui.checkBox_cd_part_1_xxx.setChecked('middle_number' in cd_char)
+        self.Ui.checkBox_cd_part_underline.setChecked('underline' in cd_char)  # 下划线分隔符
+        self.Ui.checkBox_cd_part_space.setChecked('space' in cd_char)
+        self.Ui.checkBox_cd_part_point.setChecked('point' in cd_char)
         # endregion
 
         pic_name = int(config.pic_name)  # 图片命名规则
@@ -866,6 +869,7 @@ def load_config(self):
             self.Ui.radioButton_server_emby.setChecked(True)
         self.Ui.lineEdit_emby_url.setText(str(config.emby_url))  # emby地址
         self.Ui.lineEdit_api_key.setText(str(config.api_key))  # emby密钥
+        self.Ui.lineEdit_user_id.setText(str(config.user_id))  # emby用户ID
 
         emby_on = config.emby_on
         # region emby_on
@@ -896,6 +900,7 @@ def load_config(self):
         self.Ui.checkBox_actor_pic_replace.setChecked('actor_replace' in emby_on)
         # endregion
 
+        self.Ui.checkBox_actor_photo_kodi.setChecked(config.actor_photo_kodi_auto)
         self.Ui.lineEdit_net_actor_photo.setText(config.gfriends_github)  # 网络头像库 gfriends 项目地址
         self.Ui.lineEdit_actor_photo_folder.setText(convert_path(config.actor_photo_folder))  # 本地头像目录
         self.Ui.lineEdit_actor_db_path.setText(convert_path(config.info_database_path))  # 演员数据库路径
@@ -1025,12 +1030,16 @@ def load_config(self):
         self.Ui.horizontalSlider_retry.setValue(retry_count)
         self.Ui.lcdNumber_retry.display(retry_count)
 
+        custom_website_name = self.Ui.comboBox_custom_website.currentText()
+        self.Ui.lineEdit_custom_website.setText(getattr(config, f"{custom_website_name}_website", ""))  # 自定义网站
+
         self.Ui.lineEdit_api_token_theporndb.setText(convert_path(config.theporndb_api_token))  # api token
         self.set_javdb_cookie.emit(config.javdb)  # javdb cookie
         self.set_javbus_cookie.emit(config.javbus)  # javbus cookie
         # endregion
 
         # region other
+        self.Ui.lineEdit_config_folder.setText(convert_path(config.folder))  # 配置文件目录
         rest_count = int(config.rest_count)  # 间歇刮削文件数量
         if rest_count == 0:
             rest_count = 1
@@ -1048,10 +1057,29 @@ def load_config(self):
         self.timer_scrape.stop()
         self.statement = int(config.statement)  # 间歇刮削间隔时间
 
+        self.Ui.checkBox_show_web_log.setChecked(config.show_web_log == 'on')  # 显示字段刮削过程
+        self.Ui.checkBox_show_from_log.setChecked(config.show_from_log == 'on')  # 显示字段来源信息
+        self.Ui.checkBox_show_data_log.setChecked(config.show_data_log == 'on')  # 显示字段内容信息
+        if config.save_log == 'off':  # 保存日志
+            self.Ui.radioButton_log_off.setChecked(True)
+        else:
+            self.Ui.radioButton_log_on.setChecked(True)
+        if config.update_check == 'off':  # 检查更新
+            self.Ui.radioButton_update_off.setChecked(True)
+        else:
+            self.Ui.radioButton_update_on.setChecked(True)
+
+        self.Ui.lineEdit_local_library_path.setText(convert_path(config.local_library))  # 本地资源库
+        self.Ui.lineEdit_actors_name.setText(str(config.actors_name))  # 演员名
+        self.Ui.lineEdit_netdisk_path.setText(convert_path(config.netdisk_path))  # 网盘目录
+        self.Ui.lineEdit_localdisk_path.setText(convert_path(config.localdisk_path))  # 本地磁盘目录
+        self.Ui.checkBox_hide_window_title.setChecked(config.window_title == 'hide')  # 窗口标题栏
+        # endregion
+
+        # region switch_on
         switch_on = config.switch_on
         if read_version < 20230404:
             switch_on += 'ipv4_only,'
-        # region switch_on
         self.Ui.checkBox_auto_start.setChecked('auto_start' in switch_on)
         self.Ui.checkBox_auto_exit.setChecked('auto_exit' in switch_on)
         self.Ui.checkBox_rest_scrape.setChecked('rest_scrape' in switch_on)
@@ -1091,8 +1119,7 @@ def load_config(self):
             except:
                 self.Init_QSystemTrayIcon()
                 if not mdcx_config:
-                    self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！',
-                                               QIcon(resources.icon_ico), 3000)
+                    self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
             if 'passthrough' in switch_on:
                 self.Ui.checkBox_highdpi_passthrough.setChecked(True)
                 if not os.path.isfile('highdpi_passthrough'):
@@ -1106,7 +1133,8 @@ def load_config(self):
             if 'hide_menu' in switch_on:
                 self.Ui.checkBox_hide_menu_icon.setChecked(True)
                 try:
-                    self.tray_icon.hide()
+                    if hasattr(self, 'tray_icon'):
+                        self.tray_icon.hide()
                 except:
                     signal.show_traceback_log(traceback.format_exc())
             else:
@@ -1116,39 +1144,33 @@ def load_config(self):
                 except:
                     self.Init_QSystemTrayIcon()
                     if not mdcx_config:
-                        self.tray_icon.showMessage(f"MDCx {self.localversion}",
-                                                   u'配置写入失败！所在目录没有读写权限！',
-                                                   QIcon(resources.icon_ico), 3000)
+                        self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
 
-            if 'hide_dock' in switch_on:
-                self.Ui.checkBox_hide_dock_icon.setChecked(True)
-                if not os.path.isfile('resources/Img/1'):
-                    open('resources/Img/1', 'w').close()
-            else:
-                self.Ui.checkBox_hide_dock_icon.setChecked(False)
-                if os.path.isfile('resources/Img/1'):
-                    delete_file('resources/Img/1')
-            # endregion
-
-        self.Ui.checkBox_show_web_log.setChecked(config.show_web_log == 'on')  # 显示字段刮削过程
-        self.Ui.checkBox_show_from_log.setChecked(config.show_from_log == 'on')  # 显示字段来源信息
-        self.Ui.checkBox_show_data_log.setChecked(config.show_data_log == 'on')  # 显示字段内容信息
-        if config.save_log == 'off':  # 保存日志
-            self.Ui.radioButton_log_off.setChecked(True)
-        else:
-            self.Ui.radioButton_log_on.setChecked(True)
-        if config.update_check == 'off':  # 检查更新
-            self.Ui.radioButton_update_off.setChecked(True)
-        else:
-            self.Ui.radioButton_update_on.setChecked(True)
-
-        self.Ui.lineEdit_local_library_path.setText(convert_path(config.local_library))  # 本地资源库
-        self.Ui.lineEdit_actors_name.setText(str(config.actors_name))  # 演员名
-        self.Ui.lineEdit_netdisk_path.setText(convert_path(config.netdisk_path))  # 网盘目录
-        self.Ui.lineEdit_localdisk_path.setText(convert_path(config.localdisk_path))  # 本地磁盘目录
-        self.Ui.checkBox_hide_window_title.setChecked(config.window_title == 'hide')  # 窗口标题栏
+            # TODO macOS上运行pyinstaller打包的程序，这个处理方式有问题
+            try:
+                hide_dock_flag_file = 'resources/Img/1'
+                # 在macOS上测试（普通用户），发现`hide_dock_flag_file`路径有几种情况（以下用xxx代替该相对路径）：
+                # 1.如果通过Finder进入/Applications/MDCx.app/Contents/MacOS/，然后运行MDCx，路径是/Users/username/xxx
+                # 2.如果通过终端进入/Applications/MDCx.app/Contents/MacOS/，然后运行MDCx，路径是/Applications/MDCx.app/Contents/MacOS/xxx
+                # 3.正常运行MDCx，路径是/xxx，也就是在根目录下
+                # 1和2都有权限写入文件，但不能持久化（升级后会丢失），3是没有写入权限。
+                # 暂时的处理：屏蔽异常，避免程序崩溃
+                # 考虑的处理：不使用标记文件，只使用config
+                # 相关文件：main.py
+                if 'hide_dock' in switch_on:
+                    self.Ui.checkBox_hide_dock_icon.setChecked(True)
+                    if not os.path.isfile(hide_dock_flag_file):
+                        open(hide_dock_flag_file, 'w').close()
+                else:
+                    self.Ui.checkBox_hide_dock_icon.setChecked(False)
+                    if os.path.isfile(hide_dock_flag_file):
+                        delete_file(hide_dock_flag_file)
+            except Exception as e:
+                signal.show_traceback_log(f'hide_dock_flag_file: {os.path.realpath(hide_dock_flag_file)}')
+                signal.show_traceback_log(traceback.format_exc())
         # endregion
-        # endregion
+
+        self.Ui.checkBox_create_link.setChecked(config.auto_link)
 
         # ======================================================================================END
         self.checkBox_i_agree_clean_clicked()  # 根据是否同意改变清理按钮状态
@@ -1160,13 +1182,12 @@ def load_config(self):
                 scrape_like_text += " · 软连接开"
             elif config.soft_link == 2:
                 scrape_like_text += " · 硬连接开"
-            signal.show_log_text(
-                f' 🛠 当前配置：{config.path} 加载完成！\n '
-                f'📂 程序目录：{get_main_path()} \n '
-                f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
-                f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
-                f'🖥️ 系统信息：{platform.platform()} \n '
-                f'🐰 软件版本：{self.localversion} \n')
+            signal.show_log_text(f' 🛠 当前配置：{config.path} 加载完成！\n '
+                                 f'📂 程序目录：{get_main_path()} \n '
+                                 f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
+                                 f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
+                                 f'🖥️ 系统信息：{platform.platform()} \n '
+                                 f'🐰 软件版本：{self.localversion} \n')
         except:
             signal.show_traceback_log(traceback.format_exc())
         try:

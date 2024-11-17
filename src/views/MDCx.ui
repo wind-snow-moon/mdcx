@@ -39,7 +39,7 @@
      <string/>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="page_main">
      <property name="contextMenuPolicy">
@@ -1585,7 +1585,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>510</x>
-           <y>40</y>
+           <y>30</y>
            <width>151</width>
            <height>40</height>
           </rect>
@@ -1594,216 +1594,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <string>选择文件</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="comboBox_website">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>80</y>
-           <width>351</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
-         </property>
-         <property name="maxVisibleItems">
-          <number>30</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>请选择刮削网站</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>airav_cc</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>airav</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>avsex</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>iqqtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>freejavbt</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javdb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javbus</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>jav321</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javlibrary</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>dmm</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mgstage</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>getchu_dmm</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>getchu</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>theporndb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>kin8</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>avsox</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>xcity</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>7mmtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hdouban</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mdtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>madouqu</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>cnmdb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>lulubar</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>love6</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2club</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2hub</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mywife</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>giga</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fantastica</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>faleno</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>dahlia</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>prestige</string>
-          </property>
-         </item>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>80</y>
-           <width>80</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>*刮削网站：</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
         <widget class="QLineEdit" name="lineEdit_appoint_url">
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>120</y>
+           <y>100</y>
            <width>351</width>
            <height>30</height>
           </rect>
@@ -1818,7 +1613,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>60</x>
-           <y>120</y>
+           <y>100</y>
            <width>80</width>
            <height>30</height>
           </rect>
@@ -1897,7 +1692,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>510</x>
-           <y>110</y>
+           <y>100</y>
            <width>151</width>
            <height>40</height>
           </rect>
@@ -2145,7 +1940,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <rect>
            <x>140</x>
            <y>110</y>
-           <width>341</width>
+           <width>351</width>
            <height>40</height>
           </rect>
          </property>
@@ -2333,7 +2128,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <rect>
            <x>140</x>
            <y>250</y>
-           <width>351</width>
+           <width>241</width>
            <height>40</height>
           </rect>
          </property>
@@ -2453,6 +2248,31 @@ li.checked::marker { content: &quot;\2612&quot;; }
            </widget>
           </item>
          </layout>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_create_link">
+         <property name="geometry">
+          <rect>
+           <x>410</x>
+           <y>250</y>
+           <width>191</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>刮削过程中自动创建软链接</string>
+         </property>
         </widget>
        </widget>
       </widget>
@@ -9082,12 +8902,17 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </item>
               <item>
                <property name="text">
-                <string>iqqtv</string>
+                <string>avsox</string>
                </property>
               </item>
               <item>
                <property name="text">
                 <string>freejavbt</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>iqqtv</string>
                </property>
               </item>
               <item>
@@ -9132,6 +8957,11 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </item>
               <item>
                <property name="text">
+                <string>hscangku</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
                 <string>theporndb</string>
                </property>
               </item>
@@ -9142,22 +8972,12 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </item>
               <item>
                <property name="text">
-                <string>avsox</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
                 <string>xcity</string>
                </property>
               </item>
               <item>
                <property name="text">
                 <string>7mmtv</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>hdouban</string>
                </property>
               </item>
               <item>
@@ -9202,6 +9022,11 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </item>
               <item>
                <property name="text">
+                <string>cableav</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
                 <string>mywife</string>
                </property>
               </item>
@@ -9229,6 +9054,11 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                <property name="text">
                 <string>prestige</string>
                </property>
+              </item>
+              <item>
+                <property name="text">
+                 <string>javday</string>
+                </property>
               </item>
              </widget>
             </item>
@@ -20442,7 +20272,7 @@ line-height:50px</string>
            <x>0</x>
            <y>0</y>
            <width>770</width>
-           <height>1460</height>
+           <height>1550</height>
           </rect>
          </property>
          <widget class="QGroupBox" name="groupBox_43">
@@ -20451,7 +20281,7 @@ line-height:50px</string>
             <x>30</x>
             <y>20</y>
             <width>701</width>
-            <height>291</height>
+            <height>321</height>
            </rect>
           </property>
           <property name="styleSheet">
@@ -20466,12 +20296,62 @@ line-height:50px</string>
              <x>20</x>
              <y>30</y>
              <width>661</width>
-             <height>241</height>
+             <height>268</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_25">
-            <item row="2" column="1">
-             <widget class="QLabel" name="label_121">
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="lineEdit_user_id">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_104">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>服务器地址：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLabel" name="label_105">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -20488,11 +20368,11 @@ line-height:50px</string>
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>指你的 Emby/Jellyfin 服务器地址，比如：http://192.168.1.5:8096</string>
+               <string>API 密钥创建方法：控制台-&gt;高级-&gt;API 密钥-&gt;添加（APP 名称任意）</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="8" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_19">
               <item>
                <widget class="QComboBox" name="comboBox_pic_actor">
@@ -20576,27 +20456,29 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="label_105">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">color: rgb(8, 128, 128);</string>
-              </property>
-              <property name="text">
-               <string>API密钥创建方法：控制台-&gt;高级-&gt;API 密钥-&gt;添加（APP 名称任意）</string>
-              </property>
-             </widget>
+            <item row="0" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_103">
+              <item>
+               <widget class="QRadioButton" name="radioButton_server_emby">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Emby</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_server_jellyfin">
+                <property name="text">
+                 <string>Jellyfin</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="lineEdit_emby_url">
@@ -20620,7 +20502,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
+            <item row="8" column="0">
              <widget class="QLabel" name="label_298">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20648,36 +20530,8 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_104">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>130</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="text">
-               <string>服务器地址：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="lineEdit_api_key">
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_121">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -20686,43 +20540,15 @@ line-height:50px</string>
               </property>
               <property name="minimumSize">
                <size>
-                <width>300</width>
-                <height>30</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="styleSheet">
-               <string notr="true"> font: &quot;Courier&quot;;
- border: 1px solid rgba(0,0,0, 50);
- border-radius: 15px;
-</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_107">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>130</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>API密钥：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <string>指你的 Emby/Jellyfin 服务器地址，比如：http://192.168.1.5:8096</string>
               </property>
              </widget>
             </item>
@@ -20751,29 +20577,105 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_103">
-              <item>
-               <widget class="QRadioButton" name="radioButton_server_emby">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Emby</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_server_jellyfin">
-                <property name="text">
-                 <string>Jellyfin</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_108">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>用户 ID：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_107">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>API 密钥：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="lineEdit_api_key">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QLabel" name="label_109">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(8, 128, 128);</string>
+              </property>
+              <property name="text">
+               <string>如果设置，将仅获取指定 Emby/Jellyfin 用户媒体库中的演员</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -20782,7 +20684,7 @@ line-height:50px</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>740</y>
+            <y>770</y>
             <width>701</width>
             <height>501</height>
            </rect>
@@ -21338,7 +21240,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>330</y>
+            <y>360</y>
             <width>701</width>
             <height>391</height>
            </rect>
@@ -21880,9 +21782,9 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1260</y>
+            <y>1290</y>
             <width>701</width>
-            <height>201</height>
+            <height>191</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -21905,7 +21807,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
             <rect>
              <x>160</x>
              <y>130</y>
-             <width>261</width>
+             <width>161</width>
              <height>40</height>
             </rect>
            </property>
@@ -22025,14 +21927,39 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <widget class="QPushButton" name="pushButton_del_actor_folder">
            <property name="geometry">
             <rect>
-             <x>440</x>
+             <x>490</x>
              <y>130</y>
-             <width>211</width>
+             <width>171</width>
              <height>40</height>
             </rect>
            </property>
            <property name="text">
             <string>清除所有 .actors 文件夹</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_actor_photo_kodi">
+           <property name="geometry">
+            <rect>
+             <x>340</x>
+             <y>130</y>
+             <width>141</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>刮削结束后自动创建</string>
            </property>
           </widget>
          </widget>
@@ -23020,7 +22947,7 @@ font-weight:bold</string>
             <string notr="true">color: rgb(8, 128, 128);</string>
            </property>
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://metadataapi.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#094fd1;&quot;&gt;https://metadataapi.net/&lt;/span&gt;&lt;/a&gt; 注册登录后，点头像 - API Tokens - CREATE。复制生成的 API Token 填入此处。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://theporndb.net/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#094fd1;&quot;&gt;https://theporndb.net/&lt;/span&gt;&lt;/a&gt; 注册登录后，点头像 - API Tokens - CREATE。复制生成的 API Token 填入此处。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -23839,7 +23766,7 @@ font-weight:bold</string>
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>将读取该目录中的配置文件、映射表、水印图片、演员头像等数据</string>
+               <string>将读取该目录中的配置文件、映射表、水印图片、演员头像等数据，修改后重启程序方可生效</string>
               </property>
              </widget>
             </item>

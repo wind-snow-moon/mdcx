@@ -43,8 +43,7 @@ class ActressDB:
                 return False
             name, alias = s
         show_log_text(f" ✅ 数据库中存在姓名: {alias}")
-        res = cur.execute(
-            f"select Href,Cup,Height,Bust,Waist,Hip,Birthday,Birthplace,Account,CareerPeriod from Info where Name = '{name}'")
+        res = cur.execute(f"select Href,Cup,Height,Bust,Waist,Hip,Birthday,Birthplace,Account,CareerPeriod from Info where Name = '{name}'")
         href, cup, height, bust, waist, hip, birthday, birthplace, account, career_period = res.fetchone()
         cur.close()
         # 添加标签
@@ -53,8 +52,8 @@ class ActressDB:
         if height: tags.append(f"身高: {height}")
         if bust or waist or hip: tags.append(f"三围: {bust}/{waist}/{hip}")
         if birthday:
-            actor_info.birthday = birthday
-            actor_info.year = int(birthday[:4])
+            actor_info.birthday = birthday[:10]
+            actor_info.year = birthday[:4]
             tags.append("出生日期: " + birthday[:10])
             tags.append("年龄: " + str(datetime.datetime.now().year - int(birthday[:4])))
         if career_period: tags.append("生涯: " + career_period.replace("年", "").replace(" ", "").replace("-", "~"))
@@ -76,7 +75,7 @@ class ActressDB:
             birthplace = "日本" if not birthplace else "日本·" + birthplace.replace('県', '县')
             actor_info.locations = [birthplace]
         if not actor_info.taglines:
-            actor_info.taglines = "日本AV女优"
+            actor_info.taglines = ["日本AV女优"]
         if not actor_info.overview:
             actor_info.overview = f"无维基百科信息, 从 minnano-av 数据库补全女优信息"
         return True

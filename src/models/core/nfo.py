@@ -39,8 +39,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
 
     # 字符转义，避免emby无法解析
     json_data_nfo = json_data.copy()
-    key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'actor', 'series', 'director', 'studio',
-                'publisher', 'tag', 'website', 'cover', 'poster', 'trailer']
+    key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'actor', 'series', 'director', 'studio', 'publisher', 'tag', 'website', 'cover', 'poster', 'trailer']
     rep_word = {
         '&amp;': '&',
         '&lt;': '<',
@@ -81,8 +80,10 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
     nfo_title = config.naming_media
     if not number:
         number = title
+    # 默认emby视频标题配置为 [number title]，国产重复时需去掉一个，去重需注意空格也应一起去掉，否则国产的nfo标题中会多一个空格
+    # 读取nfo title信息会去掉前面的number和空格以保留title展示出来，同时number和标题一致时，去掉number的逻辑变成去掉整个标题导致读取失败，见426行
     if number == title and 'number' in nfo_title and 'title' in nfo_title:
-        nfo_title = nfo_title.replace('originaltitle', '').replace('title', '')
+        nfo_title = nfo_title.replace('originaltitle', '').replace('title', '').strip()
     first_letter = get_number_first_letter(number)
 
     # 处理演员
@@ -90,13 +91,10 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
     temp_all_actor = deal_actor_more(json_data['all_actor'])
     temp_actor = deal_actor_more(actor)
 
-    repl_list = [['4K', temp_4k], ['originaltitle', originaltitle], ['title', title], ['outline', outline],
-                 ['number', number], ['first_actor', first_actor], ['all_actor', temp_all_actor],
-                 ['actor', temp_actor], ['release', temp_release], ['year', year], ['runtime', runtime],
-                 ['director', director], ['series', series], ['studio', studio], ['publisher', publisher],
-                 ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')], ['cnword', c_word],
-                 ['first_letter', first_letter], ['letters', letters], ['filename', filename],
-                 ['wanted', json_data['wanted']]]
+    repl_list = [['4K', temp_4k], ['originaltitle', originaltitle], ['title', title], ['outline', outline], ['number', number], ['first_actor', first_actor],
+                 ['all_actor', temp_all_actor], ['actor', temp_actor], ['release', temp_release], ['year', year], ['runtime', runtime], ['director', director],
+                 ['series', series], ['studio', studio], ['publisher', publisher], ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')],
+                 ['cnword', c_word], ['first_letter', first_letter], ['letters', letters], ['filename', filename], ['wanted', json_data['wanted']]]
     for each_key in repl_list:
         nfo_title = nfo_title.replace(each_key[0], each_key[1])
 
@@ -205,18 +203,23 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
             if 'country,' in nfo_include_new:
                 print(f"  <countrycode>{country}</countrycode>", file=code)
 
-            # 输出演员
+            # 初始化 actor_list
+            actor_list = []
+            # 输出男女演员
             if 'actor_all,' in nfo_include_new:
                 actor = all_actor
-            if actor and actor != '未知演员' and actor != '未知演員' and 'actor,' in nfo_include_new:
+            # 有演员时输出演员
+            if 'actor,' in nfo_include_new:
+                if not actor:
+                    actor = config.actor_no_name
                 actor_list = actor.split(',')  # 字符串转列表
                 actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
-                if actor_list:
-                    for each in actor_list:
-                        print("  <actor>", file=code)
-                        print("    <name>" + each + "</name>", file=code)
-                        print("    <type>Actor</type>", file=code)
-                        print("  </actor>", file=code)
+            if actor_list:
+                for each in actor_list:
+                    print("  <actor>", file=code)
+                    print("    <name>" + each + "</name>", file=code)
+                    print("    <type>Actor</type>", file=code)
+                    print("  </actor>", file=code)
 
             # 输出导演
             if director and 'director,' in nfo_include_new:
@@ -318,10 +321,11 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 print("  <website>" + website + "</website>", file=code)
 
             # javdb id 输出, 没有时使用番号搜索页
-            if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
-                print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
-            else:
-                print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
+            if "国产" not in json_data_nfo['mosaic'] and "國產" not in json_data_nfo['mosaic']:
+                if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
+                    print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
+                else:
+                    print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
             print("</movie>", file=code)
             json_data['logs'] += "\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time)
             return True
